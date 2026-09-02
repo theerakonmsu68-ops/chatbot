@@ -1,0 +1,10 @@
+.env
+apikey
+.history/
+
+*.log
+
+.DS_Store
+Thumbs.db
+
+vendor/
