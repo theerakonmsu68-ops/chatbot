@@ -1,4 +1,8 @@
 <?php
+ini_set('session.cookie_secure', 1);
+ini_set('session.cookie_httponly', 1);
+ini_set('session.cookie_samesite', 'Lax');
+
 session_start();
 require_once 'db_config.php';
 
@@ -68,7 +72,7 @@ $user_picture = (isset($_SESSION['user_picture']) && $_SESSION['user_picture'] !
             font-family: 'Inter', 'Sarabun', sans-serif;
             background: #fff;
             color: #1f1f1f;
-            opacity: 0;
+            opacity: 1;
             overflow: hidden;
             transition: opacity 0.4s ease-in-out;
             -webkit-font-smoothing: antialiased;
