@@ -27,13 +27,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-    const toggleSidebar = (show)=>{
+    const toggleSidebar = (show) => {
 
 
-        if(!sidebar) return;
+        if (!sidebar) return;
 
 
-        if(show){
+        if (show) {
 
             sidebar.classList.remove(
                 '-translate-x-full'
@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
             );
 
 
-        }else{
+        } else {
 
 
             sidebar.classList.add(
@@ -64,19 +64,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     openSidebarBtn?.addEventListener(
         'click',
-        ()=>toggleSidebar(true)
+        () => toggleSidebar(true)
     );
 
 
     closeSidebarBtn?.addEventListener(
         'click',
-        ()=>toggleSidebar(false)
+        () => toggleSidebar(false)
     );
 
 
     overlay?.addEventListener(
         'click',
-        ()=>toggleSidebar(false)
+        () => toggleSidebar(false)
     );
 
 
@@ -92,7 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('chat-box');
 
 
-    if(!chatBox) return;
+    if (!chatBox) return;
 
 
 
@@ -128,23 +128,23 @@ document.addEventListener('DOMContentLoaded', () => {
     // =====================================================
 
 
-    function escapeHTML(str){
+    function escapeHTML(str) {
 
 
-        if(!str) return "";
+        if (!str) return "";
 
 
         return String(str)
 
-        .replace(/&/g,"&amp;")
+            .replace(/&/g, "&amp;")
 
-        .replace(/</g,"&lt;")
+            .replace(/</g, "&lt;")
 
-        .replace(/>/g,"&gt;")
+            .replace(/>/g, "&gt;")
 
-        .replace(/"/g,"&quot;")
+            .replace(/"/g, "&quot;")
 
-        .replace(/'/g,"&#039;");
+            .replace(/'/g, "&#039;");
 
 
     }
@@ -157,14 +157,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // =====================================================
 
 
-    window.newChat = function(){
+    window.newChat = function () {
 
 
         currentChatId = null;
 
 
 
-        if(msgContainer){
+        if (msgContainer) {
 
             msgContainer.innerHTML = '';
 
@@ -172,19 +172,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-        if(welcome){
+        if (welcome) {
 
-            welcome.style.display='block';
+            welcome.style.display = 'block';
 
         }
 
 
 
-        if(userInput){
+        if (userInput) {
 
-            userInput.value='';
+            userInput.value = '';
 
-            userInput.style.height='auto';
+            userInput.style.height = 'auto';
 
             userInput.focus();
 
@@ -192,13 +192,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-        if(
+        if (
             window.innerWidth < 768 &&
             sidebar &&
             !sidebar.classList.contains(
                 '-translate-x-full'
             )
-        ){
+        ) {
 
             toggleSidebar(false);
 
@@ -209,28 +209,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // =====================================================
-// Load Chat History
-// =====================================================
+    // Load Chat History
+    // =====================================================
 
 
-window.loadChat = async function(chatId){
+    window.loadChat = async function (chatId) {
 
 
-    currentChatId = chatId;
-
-
-
-    if(welcome){
-
-        welcome.style.display='none';
-
-    }
+        currentChatId = chatId;
 
 
 
-    if(msgContainer){
+        if (welcome) {
 
-        msgContainer.innerHTML = `
+            welcome.style.display = 'none';
+
+        }
+
+
+
+        if (msgContainer) {
+
+            msgContainer.innerHTML = `
 
         <div class="flex flex-col items-center justify-center py-20 opacity-30">
 
@@ -244,101 +244,101 @@ window.loadChat = async function(chatId){
 
         `;
 
-    }
+        }
 
 
 
-    if(window.innerWidth < 768){
+        if (window.innerWidth < 768) {
 
-        toggleSidebar(false);
+            toggleSidebar(false);
 
-    }
-
-
+        }
 
 
-    try{
 
 
-        const response = await fetch(
-            'api.php',
-            {
-
-                method:'POST',
-
-                headers:{
-                    'Content-Type':'application/json'
-                },
+        try {
 
 
-                body:JSON.stringify({
+            const response = await fetch(
+                'api.php',
+                {
 
-                    action:'fetch',
+                    method: 'POST',
 
-                    chat_id:chatId
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
 
-                })
+
+                    body: JSON.stringify({
+
+                        action: 'fetch',
+
+                        chat_id: chatId
+
+                    })
+
+                }
+            );
+
+
+
+            const data = await response.json();
+
+
+
+
+            if (data.error) {
+
+                throw new Error(data.error);
 
             }
-        );
-
-
-
-        const data = await response.json();
 
 
 
 
-        if(data.error){
+            if (msgContainer) {
 
-            throw new Error(data.error);
+                msgContainer.innerHTML = '';
 
-        }
-
-
-
-
-        if(msgContainer){
-
-            msgContainer.innerHTML='';
-
-        }
+            }
 
 
 
-        data.history.forEach(item=>{
+            data.history.forEach(item => {
 
 
-            appendBubble(
-                'user',
-                item.message
+                appendBubble(
+                    'user',
+                    item.message
+                );
+
+
+                appendBubble(
+                    'ai',
+                    item.reply
+                );
+
+
+            });
+
+
+
+        } catch (error) {
+
+
+            console.error(
+                "Load History Error:",
+                error
             );
 
 
-            appendBubble(
-                'ai',
-                item.reply
-            );
+            if (msgContainer) {
 
+                msgContainer.innerHTML =
 
-        });
-
-
-
-    }catch(error){
-
-
-        console.error(
-            "Load History Error:",
-            error
-        );
-
-
-        if(msgContainer){
-
-            msgContainer.innerHTML=
-
-            `
+                    `
 
             <p class="text-center text-red-400 py-10 text-sm">
 
@@ -348,367 +348,366 @@ window.loadChat = async function(chatId){
 
             `;
 
+            }
+
         }
 
-    }
 
-
-};
-
-
-
-
-
-
-// =====================================================
-// Delete Modal
-// =====================================================
-
-
-const deleteModal =
-document.getElementById(
-    'gemini-delete-modal'
-);
-
-
-const modalCancelBtn =
-document.getElementById(
-    'modal-cancel-btn'
-);
-
-
-const modalConfirmBtn =
-document.getElementById(
-    'modal-confirm-btn'
-);
-
-
-const geminiToast =
-document.getElementById(
-    'gemini-toast'
-);
+    };
 
 
 
 
 
 
-window.deleteChat=function(chatId){
+    // =====================================================
+    // Delete Modal
+    // =====================================================
 
 
-
-    if(event){
-
-        event.stopPropagation();
-
-        event.preventDefault();
-
-    }
-
-
-
-    pendingDeleteChatId = chatId;
-
-
-
-    if(deleteModal){
-
-        deleteModal.classList.add(
-            'active'
+    const deleteModal =
+        document.getElementById(
+            'gemini-delete-modal'
         );
 
-    }
 
-
-};
-
-
-
-
-
-
-function closeDeleteModal(){
-
-
-    if(deleteModal){
-
-        deleteModal.classList.remove(
-            'active'
+    const modalCancelBtn =
+        document.getElementById(
+            'modal-cancel-btn'
         );
 
+
+    const modalConfirmBtn =
+        document.getElementById(
+            'modal-confirm-btn'
+        );
+
+
+    const geminiToast =
+        document.getElementById(
+            'gemini-toast'
+        );
+
+
+
+
+
+
+    window.deleteChat = function (chatId) {
+
+
+
+        if (event) {
+
+            event.stopPropagation();
+
+            event.preventDefault();
+
+        }
+
+
+
+        pendingDeleteChatId = chatId;
+
+
+
+        if (deleteModal) {
+
+            deleteModal.classList.add(
+                'active'
+            );
+
+        }
+
+
+    };
+
+
+
+
+
+
+    function closeDeleteModal() {
+
+
+        if (deleteModal) {
+
+            deleteModal.classList.remove(
+                'active'
+            );
+
+        }
+
+
+        pendingDeleteChatId = null;
+
+
     }
 
 
-    pendingDeleteChatId=null;
-
-
-}
 
 
 
-
-
-modalCancelBtn?.addEventListener(
-    'click',
-    closeDeleteModal
-);
+    modalCancelBtn?.addEventListener(
+        'click',
+        closeDeleteModal
+    );
 
 
 
 
-deleteModal?.addEventListener(
-    'click',
-    (e)=>{
+    deleteModal?.addEventListener(
+        'click',
+        (e) => {
 
-        if(e.target===deleteModal){
+            if (e.target === deleteModal) {
+
+                closeDeleteModal();
+
+            }
+
+        }
+    );
+
+
+
+
+
+
+
+    // =====================================================
+    // Confirm Delete
+    // =====================================================
+
+
+    modalConfirmBtn?.addEventListener(
+        'click',
+        async () => {
+
+
+            if (!pendingDeleteChatId)
+                return;
+
+
+
+            const targetId =
+                pendingDeleteChatId;
+
+
 
             closeDeleteModal();
 
-        }
 
-    }
-);
 
+            try {
 
 
+                const response =
+                    await fetch(
+                        'remove_room.php',
+                        {
 
+                            method: 'POST',
 
+                            headers: {
 
+                                'Content-Type': 'application/json'
 
-// =====================================================
-// Confirm Delete
-// =====================================================
+                            },
 
 
-modalConfirmBtn?.addEventListener(
-'click',
-async ()=>{
+                            body: JSON.stringify({
 
+                                chat_id: targetId
 
-    if(!pendingDeleteChatId)
-        return;
+                            })
 
-
-
-    const targetId =
-    pendingDeleteChatId;
-
-
-
-    closeDeleteModal();
-
-
-
-    try{
-
-
-        const response =
-        await fetch(
-            'remove_room.php',
-            {
-
-                method:'POST',
-
-                headers:{
-
-                    'Content-Type':'application/json'
-
-                },
-
-
-                body:JSON.stringify({
-
-                    chat_id:targetId
-
-                })
-
-            }
-        );
-
-
-
-
-        const data =
-        await response.json();
-
-
-
-
-        if(data.status==="success"){
-
-
-            const item =
-            document.getElementById(
-                `item-${targetId}`
-            );
-
-
-
-            if(item){
-
-
-                item.style.opacity='0';
-
-                item.style.transform=
-                'translateX(-20px)';
-
-
-                setTimeout(()=>{
-
-                    item.remove();
-
-                },300);
-
-
-            }
-
-
-
-
-
-            if(currentChatId===targetId){
-
-
-                currentChatId=null;
-
-
-
-                if(msgContainer){
-
-                    msgContainer.innerHTML='';
-
-                }
-
-
-
-                if(welcome){
-
-                    welcome.style.display='block';
-
-                }
-
-
-            }
-
-
-
-
-            if(geminiToast){
-
-
-                geminiToast.classList.remove(
-
-                    'translate-y-20',
-
-                    'opacity-0'
-
-                );
-
-
-
-                setTimeout(()=>{
-
-
-                    geminiToast.classList.add(
-
-                        'translate-y-20',
-
-                        'opacity-0'
-
+                        }
                     );
 
 
-                },2500);
+
+
+                const data =
+                    await response.json();
+
+
+
+
+                if (data.status === "success") {
+
+
+                    const item =
+                        document.getElementById(
+                            `item-${targetId}`
+                        );
+
+
+
+                    if (item) {
+
+
+                        item.style.opacity = '0';
+
+                        item.style.transform =
+                            'translateX(-20px)';
+
+
+                        setTimeout(() => {
+
+                            item.remove();
+
+                        }, 300);
+
+
+                    }
+
+
+
+
+
+                    if (currentChatId === targetId) {
+
+
+                        currentChatId = null;
+
+
+
+                        if (msgContainer) {
+
+                            msgContainer.innerHTML = '';
+
+                        }
+
+
+
+                        if (welcome) {
+
+                            welcome.style.display = 'block';
+
+                        }
+
+
+                    }
+
+
+
+
+                    if (geminiToast) {
+
+
+                        geminiToast.classList.remove(
+
+                            'translate-y-20',
+
+                            'opacity-0'
+
+                        );
+
+
+
+                        setTimeout(() => {
+
+
+                            geminiToast.classList.add(
+
+                                'translate-y-20',
+
+                                'opacity-0'
+
+                            );
+
+
+                        }, 2500);
+
+
+                    }
+
+
+
+
+
+                } else {
+
+
+                    alert(
+                        'ไม่สามารถลบข้อมูลห้องสนทนาได้'
+                    );
+
+
+                }
+
+
+
+
+            } catch (error) {
+
+
+                console.error(
+                    "Delete Error:",
+                    error
+                );
+
+
+                alert(
+                    'ไม่สามารถเชื่อมต่อ Server ได้'
+                );
 
 
             }
 
 
 
+        });
 
 
-        }else{
+    // =====================================================
+    // Render Chat Bubble
+    // =====================================================
 
 
-            alert(
-                'ไม่สามารถลบข้อมูลห้องสนทนาได้'
-            );
+    function appendBubble(sender, text, id = null) {
 
+
+        if (!msgContainer)
+            return;
+
+
+
+        const wrapper =
+            document.createElement('div');
+
+
+
+        wrapper.className =
+            `flex w-full ${sender === 'user'
+                ? 'justify-end'
+                : 'justify-start'
+            } mb-8 msg-animate`;
+
+
+
+        if (id) {
+
+            wrapper.id = id;
 
         }
 
 
 
 
-    }catch(error){
+        const avatar = sender === 'user'
 
 
-        console.error(
-            "Delete Error:",
-            error
-        );
-
-
-        alert(
-            'ไม่สามารถเชื่อมต่อ Server ได้'
-        );
-
-
-    }
-
-
-
-});
-
-
-// =====================================================
-// Render Chat Bubble
-// =====================================================
-
-
-function appendBubble(sender, text, id=null){
-
-
-    if(!msgContainer)
-        return;
-
-
-
-    const wrapper =
-    document.createElement('div');
-
-
-
-    wrapper.className =
-    `flex w-full ${
-        sender==='user'
-        ? 'justify-end'
-        : 'justify-start'
-    } mb-8 msg-animate`;
-
-
-
-    if(id){
-
-        wrapper.id=id;
-
-    }
-
-
-
-
-    const avatar = sender==='user'
-
-
-    ? `<img src="${userPic || ''}"
+            ? `<img src="${userPic || ''}"
         referrerpolicy="no-referrer"
         class="w-8 h-8 rounded-full border border-gray-100 object-cover shadow-sm"
         onerror="this.src='https://ui-avatars.com/api/?name=User'">`
 
 
-    :
+            :
 
-    `<div class="
+            `<div class="
         w-8 h-8 rounded-full 
         bg-[#f8f9fa]
         flex items-center justify-center
@@ -723,13 +722,13 @@ function appendBubble(sender, text, id=null){
 
 
 
-    const bubbleClass =
-    sender==='user'
+        const bubbleClass =
+            sender === 'user'
 
 
-    ?
+                ?
 
-    `
+                `
     bg-[#e8f0fe]
     text-[#1967d2]
     rounded-[20px_20px_4px_20px]
@@ -739,9 +738,9 @@ function appendBubble(sender, text, id=null){
 
 
 
-    :
+                :
 
-    `
+                `
     text-[#3c4043]
     pt-1
     content-area
@@ -753,18 +752,17 @@ function appendBubble(sender, text, id=null){
 
 
 
-    wrapper.innerHTML = `
+        wrapper.innerHTML = `
 
 
     <div class="
         flex
-        ${
-        sender==='user'
-        ?
-        'flex-row-reverse'
-        :
-        'flex-row'
-        }
+        ${sender === 'user'
+                ?
+                'flex-row-reverse'
+                :
+                'flex-row'
+            }
         gap-3
         max-w-[85%]
         items-start
@@ -794,62 +792,24 @@ ${escapeHTML(text)}
 
 
 
-    msgContainer.appendChild(wrapper);
+        msgContainer.appendChild(wrapper);
 
 
 
-    setTimeout(()=>{
+        setTimeout(() => {
 
 
-        chatBox.scrollTo({
+            chatBox.scrollTo({
 
-            top:chatBox.scrollHeight,
+                top: chatBox.scrollHeight,
 
-            behavior:'smooth'
+                behavior: 'smooth'
 
-        });
-
-
-    },50);
+            });
 
 
-}
+        }, 50);
 
-
-
-
-
-
-
-
-// =====================================================
-// SEND MESSAGE
-// =====================================================
-
-
-async function send(){
-
-
-
-    if(!userInput)
-        return;
-
-
-
-    const text =
-    userInput.value.trim();
-
-
-
-    if(!text)
-        return;
-
-
-
-
-    if(welcome){
-
-        welcome.style.display='none';
 
     }
 
@@ -857,31 +817,69 @@ async function send(){
 
 
 
-    appendBubble(
-        'user',
-        text
-    );
+
+
+
+    // =====================================================
+    // SEND MESSAGE
+    // =====================================================
+
+
+    async function send() {
+
+
+
+        if (!userInput)
+            return;
+
+
+
+        const text =
+            userInput.value.trim();
+
+
+
+        if (!text)
+            return;
+
+
+
+
+        if (welcome) {
+
+            welcome.style.display = 'none';
+
+        }
 
 
 
 
 
-    userInput.value='';
-
-    userInput.style.height='auto';
-
-
-
-
-
-    const aiId =
-    'ai-' + Date.now();
+        appendBubble(
+            'user',
+            text
+        );
 
 
 
 
 
-    const typingHTML = `
+        userInput.value = '';
+
+        userInput.style.height = 'auto';
+
+
+
+
+
+        const aiId =
+            'ai-' + Date.now();
+
+
+
+
+
+        const typingHTML = `
 
 
     <div class="
@@ -927,180 +925,180 @@ async function send(){
 
 
 
-appendBubble(
-    'ai',
-    '',
-    aiId
-);
-
-
-const typingBubble =
-document.getElementById(aiId);
-
-
-if(typingBubble){
-
-    const contentArea =
-    typingBubble.querySelector('.content-area');
-
-
-    if(contentArea){
-
-        contentArea.innerHTML = typingHTML;
-
-    }
-
-}
-
-
-
-
-
-    // =====================================================
-    // Abort Controller Timeout
-    // =====================================================
-
-
-    const controller =
-    new AbortController();
-
-
-
-    const timeout =
-    setTimeout(()=>{
-
-        controller.abort();
-
-    },60000);
-
-
-
-
-
-
-
-    try{
-
-
-
-        const response =
-        await fetch(
-            'api.php',
-            {
-
-
-                method:'POST',
-
-
-                signal:controller.signal,
-
-
-                headers:{
-
-
-                    'Content-Type':
-                    'application/json'
-
-
-                },
-
-
-
-                body:JSON.stringify({
-
-                    action:'chat',
-
-                    message:text,
-
-                    chat_id:currentChatId
-
-
-                })
-
-
-            }
+        appendBubble(
+            'ai',
+            '',
+            aiId
         );
 
 
-
-        clearTimeout(timeout);
-
-
+        const typingBubble =
+            document.getElementById(aiId);
 
 
-
-        const data =
-        await response.json();
-
-
-
-
-
-
-        // API Error จาก PHP
-
-
-        if(data.error){
-
-
-            throw new Error(
-                data.error
-            );
-
-
-        }
-
-
-
-
-
-
-
-        if(
-            !currentChatId &&
-            data.chat_id
-        ){
-
-
-            currentChatId =
-            data.chat_id;
-
-
-
-            updateSidebarRealtime(
-                data.chat_id,
-                text
-            );
-
-
-        }
-
-
-
-
-
-        const aiBubble =
-        document.getElementById(aiId);
-
-
-
-
-
-        if(aiBubble){
-
+        if (typingBubble) {
 
             const contentArea =
-            aiBubble.querySelector(
-                '.content-area'
-            );
+                typingBubble.querySelector('.content-area');
+
+
+            if (contentArea) {
+
+                contentArea.innerHTML = typingHTML;
+
+            }
+
+        }
 
 
 
-            if(contentArea){
+
+
+        // =====================================================
+        // Abort Controller Timeout
+        // =====================================================
+
+
+        const controller =
+            new AbortController();
 
 
 
-                contentArea.innerHTML = `
+        const timeout =
+            setTimeout(() => {
+
+                controller.abort();
+
+            }, 60000);
+
+
+
+
+
+
+
+        try {
+
+
+
+            const response =
+                await fetch(
+                    'api.php',
+                    {
+
+
+                        method: 'POST',
+
+
+                        signal: controller.signal,
+
+
+                        headers: {
+
+
+                            'Content-Type':
+                                'application/json'
+
+
+                        },
+
+
+
+                        body: JSON.stringify({
+
+                            action: 'chat',
+
+                            message: text,
+
+                            chat_id: currentChatId
+
+
+                        })
+
+
+                    }
+                );
+
+
+
+            clearTimeout(timeout);
+
+
+
+
+
+            const data =
+                await response.json();
+
+
+
+
+
+
+            // API Error จาก PHP
+
+
+            if (data.error) {
+
+
+                throw new Error(
+                    data.error
+                );
+
+
+            }
+
+
+
+
+
+
+
+            if (
+                !currentChatId &&
+                data.chat_id
+            ) {
+
+
+                currentChatId =
+                    data.chat_id;
+
+
+
+                updateSidebarRealtime(
+                    data.chat_id,
+                    text
+                );
+
+
+            }
+
+
+
+
+
+            const aiBubble =
+                document.getElementById(aiId);
+
+
+
+
+
+            if (aiBubble) {
+
+
+                const contentArea =
+                    aiBubble.querySelector(
+                        '.content-area'
+                    );
+
+
+
+                if (contentArea) {
+
+
+
+                    contentArea.innerHTML = `
 
                 <div class="
                     opacity-0
@@ -1109,12 +1107,10 @@ if(typingBubble){
                 "
                 id="fade-${aiId}">
 
-                ${
-                escapeHTML(
-                    data.reply || ''
-                )
-                .replace(/\n/g,'<br>')
-                }
+                ${linkify(
+                        data.reply || ''
+                    )
+                        }
 
                 </div>
 
@@ -1123,63 +1119,63 @@ if(typingBubble){
 
 
 
-                setTimeout(()=>{
+                    setTimeout(() => {
 
 
-                    const fadeEl =
-                    document.getElementById(
-                        `fade-${aiId}`
-                    );
+                        const fadeEl =
+                            document.getElementById(
+                                `fade-${aiId}`
+                            );
 
 
 
-                    fadeEl?.classList.remove(
-                        'opacity-0'
-                    );
+                        fadeEl?.classList.remove(
+                            'opacity-0'
+                        );
 
 
-                },10);
+                    }, 10);
+
+
+                }
 
 
             }
 
 
-        }
+
+
+        } catch (error) {
 
 
 
-
-    }catch(error){
-
-
-
-        console.error(
-            "Chat Error:",
-            error
-        );
-
-
-
-        const aiBubble =
-        document.getElementById(aiId);
-
-
-
-        if(aiBubble){
-
-
-            const area =
-            aiBubble.querySelector(
-                '.content-area'
+            console.error(
+                "Chat Error:",
+                error
             );
 
 
 
-            if(area){
+            const aiBubble =
+                document.getElementById(aiId);
 
 
-                area.innerHTML =
-                `
+
+            if (aiBubble) {
+
+
+                const area =
+                    aiBubble.querySelector(
+                        '.content-area'
+                    );
+
+
+
+                if (area) {
+
+
+                    area.innerHTML =
+                        `
                 <span class="text-red-500">
 
                 ขออภัยครับ ระบบเชื่อมต่อไม่ได้
@@ -1188,59 +1184,59 @@ if(typingBubble){
                 `;
 
 
+                }
+
+
             }
 
 
         }
 
 
+
     }
 
 
 
-}
+
+
+
+
+    // =====================================================
+    // Update Sidebar
+    // =====================================================
+
+
+    function updateSidebarRealtime(chatId, message) {
+
+
+
+        const historyList =
+            document.getElementById(
+                'history-list'
+            );
+
+
+
+        if (!historyList)
+            return;
 
 
 
 
 
-
-
-// =====================================================
-// Update Sidebar
-// =====================================================
-
-
-function updateSidebarRealtime(chatId,message){
+        const div =
+            document.createElement('div');
 
 
 
-    const historyList =
-    document.getElementById(
-        'history-list'
-    );
+        div.id =
+            `item-${chatId}`;
 
 
 
-    if(!historyList)
-        return;
-
-
-
-
-
-    const div =
-    document.createElement('div');
-
-
-
-    div.id =
-    `item-${chatId}`;
-
-
-
-    div.className =
-    `
+        div.className =
+            `
     sidebar-item
     group
     flex
@@ -1259,7 +1255,7 @@ function updateSidebarRealtime(chatId,message){
 
 
 
-    div.innerHTML = `
+        div.innerHTML = `
 
     <span
     onclick="loadChat('${chatId}')"
@@ -1294,78 +1290,87 @@ function updateSidebarRealtime(chatId,message){
 
 
 
-    historyList.prepend(div);
+        historyList.prepend(div);
 
 
-}
-
-
-
-
-
-
-
-// =====================================================
-// Events
-// =====================================================
-
-
-if(sendBtn){
-
-    sendBtn.onclick = send;
-
-}
-
-
-
-if(userInput){
-
-
-    userInput.onkeydown =
-    (e)=>{
-
-
-        if(
-            e.key==="Enter"
-            &&
-            !e.shiftKey
-        ){
-
-
-            e.preventDefault();
-
-
-            send();
-
-
-        }
-
-
-    };
+    }
 
 
 
 
 
-    userInput.oninput=function(){
 
 
-        this.style.height='auto';
+    // =====================================================
+    // Events
+    // =====================================================
 
 
-        this.style.height =
-        this.scrollHeight+'px';
+    if (sendBtn) {
+
+        sendBtn.onclick = send;
+
+    }
 
 
-    };
+
+    if (userInput) {
+
+
+        userInput.onkeydown =
+            (e) => {
+
+
+                if (
+                    e.key === "Enter"
+                    &&
+                    !e.shiftKey
+                ) {
+
+
+                    e.preventDefault();
+
+
+                    send();
+
+
+                }
+
+
+            };
 
 
 
-    userInput.focus();
 
 
-}
+        userInput.oninput = function () {
 
 
+            this.style.height = 'auto';
+
+
+            this.style.height =
+                this.scrollHeight + 'px';
+
+
+        };
+
+
+
+        userInput.focus();
+
+
+    }
+
+    function linkify(text) {
+
+        return escapeHTML(text)
+            .replace(
+                /(https?:\/\/[^\s]+)/g,
+                '<a href="$1" target="_blank" rel="noopener noreferrer" class="text-red-600 underline font-medium">$1</a>'
+            )
+            .replace(/\n/g, '<br>');
+
+    }
 
 });
