@@ -15,41 +15,40 @@ function searchYoutube($keyword)
     $api_key = getenv("YOUTUBE_API_KEY");
 
 
-    if(empty($api_key)){
+    if (empty($api_key)) {
 
         return null;
-
     }
 
 
 
     $url =
-    "https://www.googleapis.com/youtube/v3/search?"
-    .http_build_query([
+        "https://www.googleapis.com/youtube/v3/search?"
+        . http_build_query([
 
 
-        "key" => $api_key,
+            "key" => $api_key,
 
 
-        "part" => "snippet",
+            "part" => "snippet",
 
 
-        "q" => $keyword,
+            "q" => $keyword,
 
 
-        "type" => "video",
+            "type" => "video",
 
 
-        "maxResults" => 1,
+            "maxResults" => 1,
 
 
-        "regionCode" => "TH",
+            "regionCode" => "TH",
 
 
-        "relevanceLanguage" => "th"
+            "relevanceLanguage" => "th"
 
 
-    ]);
+        ]);
 
 
 
@@ -57,7 +56,7 @@ function searchYoutube($keyword)
 
 
 
-    curl_setopt_array($ch,[
+    curl_setopt_array($ch, [
 
 
         CURLOPT_RETURNTRANSFER => true,
@@ -79,33 +78,30 @@ function searchYoutube($keyword)
 
 
     $data =
-    json_decode(
-        $response,
-        true
-    );
+        json_decode(
+            $response,
+            true
+        );
 
 
 
-    if(
+    if (
         isset(
             $data['items'][0]['id']['videoId']
         )
-    ){
+    ) {
 
 
         return
 
-        "https://www.youtube.com/watch?v="
+            "https://www.youtube.com/watch?v="
 
-        .$data['items'][0]['id']['videoId'];
-
-
+            . $data['items'][0]['id']['videoId'];
     }
 
 
 
     return null;
-
 }
 
 
@@ -146,7 +142,7 @@ $action = $data['action'] ?? 'chat';
 // =====================================================
 
 
-if(!$user_id){
+if (!$user_id) {
 
 
     echo json_encode([
@@ -159,21 +155,20 @@ if(!$user_id){
 
 
     exit;
-
 }
 
 // =====================================================
 // FETCH CHAT HISTORY
 // =====================================================
 
-if($action === 'fetch'){
+if ($action === 'fetch') {
 
 
     $chat_id = $data['chat_id'] ?? '';
 
 
 
-    if(empty($chat_id)){
+    if (empty($chat_id)) {
 
 
         echo json_encode([
@@ -184,7 +179,6 @@ if($action === 'fetch'){
 
 
         exit;
-
     }
 
 
@@ -205,7 +199,7 @@ if($action === 'fetch'){
 
 
 
-    if(!$stmt){
+    if (!$stmt) {
 
 
         echo json_encode([
@@ -216,7 +210,6 @@ if($action === 'fetch'){
 
 
         exit;
-
     }
 
 
@@ -246,7 +239,7 @@ if($action === 'fetch'){
 
 
 
-    while($row = $result->fetch_assoc()){
+    while ($row = $result->fetch_assoc()) {
 
 
         $history[] = [
@@ -259,7 +252,6 @@ if($action === 'fetch'){
 
 
         ];
-
     }
 
 
@@ -279,7 +271,6 @@ if($action === 'fetch'){
 
 
     exit;
-
 }
 
 
@@ -305,7 +296,7 @@ $chat_id = $data['chat_id'] ?? null;
 
 // สร้าง Chat ID ใหม่
 
-if(empty($chat_id)){
+if (empty($chat_id)) {
 
 
     $chat_id = bin2hex(
@@ -313,14 +304,12 @@ if(empty($chat_id)){
         random_bytes(8)
 
     );
-
-
 }
 
 
 
 
-if(empty($message)){
+if (empty($message)) {
 
 
     echo json_encode([
@@ -334,7 +323,6 @@ if(empty($message)){
 
 
     exit;
-
 }
 
 
@@ -348,35 +336,54 @@ if(empty($message)){
 
 $messages = [
 
-
     [
 
-
         "role" => "system",
-
 
         "content" => "
 
 คุณคือ พี่สารคาม AI ผู้ช่วยอัจฉริยะ
 
 หน้าที่:
-- ตอบคำถามทั่วไป
-- ให้ข้อมูลที่เข้าใจง่าย
-- ใช้ภาษาไทย สุภาพ เป็นกันเอง
+- ตอบคำถามให้ถูกต้องและเข้าใจง่าย
+- วิเคราะห์คำถามก่อนตอบ
+- ให้คำตอบเหมือนผู้ช่วยมืออาชีพ
+- ใช้ภาษาไทยเป็นหลัก
+
+รูปแบบการตอบ:
+- เรียบเรียงเป็นประโยคที่อ่านง่าย
+- ใช้ย่อหน้าให้เหมาะสม
+- ถ้ามีหลายข้อ ให้ใช้รายการตัวเลขหรือหัวข้อ
+- ไม่ใช้ Markdown ที่ซับซ้อน
+- ไม่ใช้เครื่องหมายพิเศษ เช่น ###, **, ``` 
+- ไม่ใส่โค้ดหรือรูปแบบแปลก ๆ หากผู้ใช้ไม่ได้ร้องขอ
+
+สไตล์:
+- สุภาพ
+- เป็นกันเอง
+- กระชับ แต่ให้ข้อมูลครบ
+- อธิบายเหมือนผู้เชี่ยวชาญกำลังให้คำแนะนำ
+
+หากไม่แน่ใจ:
+- แจ้งอย่างตรงไปตรงมา
+- ไม่แต่งข้อมูลขึ้นเอง
 
 หากผู้ใช้ขอเพลง:
-- ให้บอกชื่อเพลง
-- บอกศิลปินถ้าทราบ
-- ไม่ต้องสร้างลิงก์ YouTube เอง
-- ระบบจะเพิ่มลิงก์เพลงจริงให้อัตโนมัติ
+- บอกชื่อเพลงและศิลปิน
+- ระบบจะเพิ่มลิงก์ YouTube ให้อัตโนมัติ
+- ไม่สร้างลิงก์ปลอม
 
-ตอบกระชับและเป็นธรรมชาติ
+ก่อนตอบให้วิเคราะห์ความต้องการของผู้ใช้ก่อน
+
+ตอบเฉพาะข้อมูลที่จำเป็น
+ไม่อธิบายกระบวนการคิดภายใน
+ไม่แสดงเหตุผลการคิดทีละขั้น
+
+ตอบเหมือนผู้ช่วยส่วนตัวที่มีความรู้
 
 "
 
-
     ]
-
 
 ];
 
@@ -401,7 +408,7 @@ WHERE chat_id = ?
 
 AND user_id = ?
 
-ORDER BY id ASC
+ORDER BY id DESC
 
 LIMIT 10
 
@@ -410,7 +417,7 @@ LIMIT 10
 
 
 
-if($stmt_history){
+if ($stmt_history) {
 
 
     $stmt_history->bind_param(
@@ -440,7 +447,7 @@ if($stmt_history){
 
 
 
-    while($row = $result_history->fetch_assoc()){
+    while ($row = $result_history->fetch_assoc()) {
 
 
         $messages[] = [
@@ -466,15 +473,11 @@ if($stmt_history){
 
 
         ];
-
-
     }
 
 
 
     $stmt_history->close();
-
-
 }
 
 
@@ -514,7 +517,7 @@ $model = getenv("GROQ_MODEL")
 
 
 
-if(empty($api_key)){
+if (empty($api_key)) {
 
 
     echo json_encode([
@@ -531,7 +534,6 @@ if(empty($api_key)){
 
 
     exit;
-
 }
 
 // =====================================================
@@ -540,7 +542,7 @@ if(empty($api_key)){
 
 
 $api_url =
-"https://api.groq.com/openai/v1/chat/completions";
+    "https://api.groq.com/openai/v1/chat/completions";
 
 
 
@@ -548,13 +550,13 @@ $ch = curl_init($api_url);
 
 
 
-curl_setopt_array($ch,[
+curl_setopt_array($ch, [
 
 
     CURLOPT_HTTPHEADER => [
 
 
-        "Authorization: Bearer ".$api_key,
+        "Authorization: Bearer " . $api_key,
 
 
         "Content-Type: application/json"
@@ -576,8 +578,9 @@ curl_setopt_array($ch,[
 
         "messages" => $messages,
 
+        "temperature" => 0.4,
 
-        "temperature" => 0.7
+        "top_p" => 0.9
 
 
 
@@ -616,7 +619,7 @@ $response = curl_exec($ch);
 // =====================================================
 
 
-if(curl_errno($ch)){
+if (curl_errno($ch)) {
 
 
 
@@ -629,25 +632,22 @@ if(curl_errno($ch)){
 
 
     error_log(
-        "Groq CURL Error : ".$error
+        "Groq CURL Error : " . $error
     );
 
 
 
     $ai_reply =
-    "ขออภัยครับ พี่สารคามไม่สามารถเชื่อมต่อระบบ AI ได้";
-
-
-
-}else{
+        "ขออภัยครับ พี่สารคามไม่สามารถเชื่อมต่อระบบ AI ได้";
+} else {
 
 
 
     $http_code =
-    curl_getinfo(
-        $ch,
-        CURLINFO_HTTP_CODE
-    );
+        curl_getinfo(
+            $ch,
+            CURLINFO_HTTP_CODE
+        );
 
 
 
@@ -656,37 +656,53 @@ if(curl_errno($ch)){
 
 
     $json =
-    json_decode(
-        $response,
-        true
-    );
+        json_decode(
+            $response,
+            true
+        );
 
 
 
 
-    if(
+    if (
         isset(
             $json['choices'][0]['message']['content']
         )
-    ){
+    ) {
 
 
 
         $ai_reply =
 
-        $json['choices'][0]['message']['content'];
+            $json['choices'][0]['message']['content'];
+        // =====================================================
+        // Clean AI Response
+        // =====================================================
+
+        $ai_reply = preg_replace(
+            '/#{1,6}\s*/',
+            '',
+            $ai_reply
+        );
 
 
+        $ai_reply = str_replace(
+            ['**', '```'],
+            '',
+            $ai_reply
+        );
 
-    }else{
+
+        $ai_reply = trim($ai_reply);
+    } else {
 
 
 
         $api_error =
 
-        $json['error']['message']
+            $json['error']['message']
 
-        ?? "Unknown Groq Error";
+            ?? "Unknown Groq Error";
 
 
 
@@ -694,11 +710,11 @@ if(curl_errno($ch)){
 
             "Groq API Error HTTP "
 
-            .$http_code
+                . $http_code
 
-            ." : "
+                . " : "
 
-            .$api_error
+                . $api_error
 
         );
 
@@ -706,10 +722,8 @@ if(curl_errno($ch)){
 
         $ai_reply =
 
-        "ขออภัยครับ พี่สารคามไม่สามารถประมวลผลได้";
-
+            "ขออภัยครับ พี่สารคามไม่สามารถประมวลผลได้";
     }
-
 }
 
 
@@ -722,34 +736,38 @@ if(curl_errno($ch)){
 // =====================================================
 
 
-if(
+if (
     preg_match(
         '/เพลง|ฟัง|music|song|youtube/i',
         $message
     )
-){
+) {
 
 
-    $youtube = searchYoutube($message);
+   $keyword = preg_replace(
+    '/ขอ|เพลง|ฟัง|เปิด|youtube/i',
+    '',
+    $message
+);
+
+
+$youtube = searchYoutube(
+    trim($keyword)
+);
 
 
 
-    if($youtube){
+    if ($youtube) {
 
 
 
         $ai_reply .=
 
 
-        "\n\n🎧 เปิดฟังเพลง:\n"
+            "\n\n🎧 เปิดฟังเพลง:\n"
 
-        .$youtube;
-
-
-
+            . $youtube;
     }
-
-
 }
 
 
@@ -782,7 +800,7 @@ VALUES (?,?,?,?)
 
 
 
-if($stmt){
+if ($stmt) {
 
 
 
@@ -814,8 +832,6 @@ if($stmt){
 
 
     $stmt->close();
-
-
 }
 
 
@@ -851,6 +867,3 @@ echo json_encode([
 
 
 ], JSON_UNESCAPED_UNICODE);
-
-
-?>
