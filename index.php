@@ -3,8 +3,8 @@ session_start();
 require_once 'db_config.php';
 
 // Google Login Config
-$client_id = '218704445431-61uds5l20fjf0bb5ioorgqvbn6fq6gn5.apps.googleusercontent.com';
-$redirect_uri = 'https://chatbotmsu.rf.gd/login_google.php';
+$client_id = getenv("GOOGLE_CLIENT_ID");
+$redirect_uri = getenv("GOOGLE_REDIRECT_URI");
 $google_login_url = 'https://accounts.google.com/o/oauth2/v2/auth?' . http_build_query([
     'client_id' => $client_id,
     'redirect_uri' => $redirect_uri,
