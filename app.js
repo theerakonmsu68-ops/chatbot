@@ -780,13 +780,7 @@ function appendBubble(sender, text, id=null){
 
         <div class="${bubbleClass}">
 
-            ${
-            sender==='ai'
-            ?
-            escapeHTML(text)
-            :
-            escapeHTML(text)
-            }
+${escapeHTML(text)}
 
 
         </div>
@@ -933,11 +927,30 @@ async function send(){
 
 
 
-    appendBubble(
-        'ai',
-        typingHTML,
-        aiId
-    );
+appendBubble(
+    'ai',
+    '',
+    aiId
+);
+
+
+const typingBubble =
+document.getElementById(aiId);
+
+
+if(typingBubble){
+
+    const contentArea =
+    typingBubble.querySelector('.content-area');
+
+
+    if(contentArea){
+
+        contentArea.innerHTML = typingHTML;
+
+    }
+
+}
 
 
 
