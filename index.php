@@ -31,12 +31,12 @@ $user_picture = (isset($_SESSION['user_picture']) && $_SESSION['user_picture'] !
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="referrer" content="no-referrer">
     <title>Chatbot IT - Mahasarakham University</title>
-    
+
     <script src="https://cdn.tailwindcss.com"></script>
-    
+
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Sarabun:wght@300;400;500&display=swap" rel="stylesheet">
     <link href="https://upload.wikimedia.org/wikipedia/th/b/bb/Informatics_MSU_Logo.svg" rel="icon">
-    
+
     <style>
         :root {
             --app-height: 100vh;
@@ -114,6 +114,7 @@ $user_picture = (isset($_SESSION['user_picture']) && $_SESSION['user_picture'] !
                 opacity: 0;
                 transform: translateY(12px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -245,7 +246,8 @@ $user_picture = (isset($_SESSION['user_picture']) && $_SESSION['user_picture'] !
             min-width: 0;
             width: 100%;
             min-height: 48px;
-            font-size: 16px; /* ป้องกัน Safari ซูมอัตโนมัติเมื่อโฟกัส */
+            font-size: 16px;
+            /* ป้องกัน Safari ซูมอัตโนมัติเมื่อโฟกัส */
             line-height: 1.5;
         }
 
@@ -434,7 +436,8 @@ $user_picture = (isset($_SESSION['user_picture']) && $_SESSION['user_picture'] !
             }
         }
 
-        @media (hover: none), (pointer: coarse) {
+        @media (hover: none),
+        (pointer: coarse) {
             .sidebar-item button {
                 opacity: 1 !important;
                 min-width: 36px;
@@ -446,6 +449,7 @@ $user_picture = (isset($_SESSION['user_picture']) && $_SESSION['user_picture'] !
         }
 
         @media (prefers-reduced-motion: reduce) {
+
             *,
             *::before,
             *::after {
@@ -486,17 +490,17 @@ $user_picture = (isset($_SESSION['user_picture']) && $_SESSION['user_picture'] !
             </div>
             <h3 class="login-title font-bold mb-2 tracking-tight text-gray-800">Chatbot IT</h3>
             <p class="text-gray-400 text-sm mb-8 tracking-wide uppercase font-medium">Mahasarakham University</p>
-            
+
             <a href="<?= $google_login_url ?>"
                 class="google-login-button px-5 sm:px-8 py-3.5 border border-gray-200 rounded-full flex items-center gap-3 hover:bg-gray-50 hover:border-gray-300 transition-all font-medium shadow-sm text-sm sm:text-base active:scale-95 bg-white text-gray-700">
                 <img src="https://www.google.com/favicon.ico" class="w-5 h-5" alt="Google"> เข้าใช้งานด้วย Google Account
             </a>
-            
+
             <?php if (isset($_GET['error'])): ?>
-    <div class="mt-4 p-4 bg-red-50 text-red-600 rounded-xl text-sm border border-red-100 max-w-sm text-center">
-        <strong>เข้าสู่ระบบไม่สำเร็จ:</strong> โปรดตรวจสอบการเชื่อมต่อหรือข้อมูลบัญชี Google ของคุณ แล้วลองใหม่อีกครั้ง
-    </div>
-<?php endif; ?>
+                <div class="mt-4 p-4 bg-red-50 text-red-600 rounded-xl text-sm border border-red-100 max-w-sm text-center">
+                    <strong>เข้าสู่ระบบไม่สำเร็จ:</strong> โปรดตรวจสอบการเชื่อมต่อหรือข้อมูลบัญชี Google ของคุณ แล้วลองใหม่อีกครั้ง
+                </div>
+            <?php endif; ?>
         </div>
     <?php else: ?>
         <div id="overlay" class="fixed inset-0 bg-black/20 z-[55] hidden backdrop-blur-sm transition-opacity duration-300"></div>
@@ -526,7 +530,15 @@ $user_picture = (isset($_SESSION['user_picture']) && $_SESSION['user_picture'] !
                 <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-2 mb-2">ประวัติการสนทนาล่าสุด</p>
                 <div id="history-list" class="space-y-1">
                     <?php
-                    $stmt = $conn->prepare("SELECT chat_id, message FROM chat_history WHERE user_id = ? GROUP BY chat_id ORDER BY id DESC LIMIT 20");
+                    $stmt = $conn->prepare("SELECT 
+    chat_id,
+    MAX(message) AS message,
+    MAX(id) AS id
+FROM chat_history
+WHERE user_id = ?
+GROUP BY chat_id
+ORDER BY id DESC
+LIMIT 20");
                     $stmt->bind_param("s", $_SESSION['user_id']);
                     $stmt->execute();
                     $res = $stmt->get_result();
@@ -544,7 +556,9 @@ $user_picture = (isset($_SESSION['user_picture']) && $_SESSION['user_picture'] !
                                 </svg>
                             </button>
                         </div>
-                    <?php endwhile; $stmt->close(); $conn->close(); ?>
+                    <?php endwhile;
+                    $stmt->close();
+                    $conn->close(); ?>
                 </div>
             </div>
 
@@ -603,7 +617,7 @@ $user_picture = (isset($_SESSION['user_picture']) && $_SESSION['user_picture'] !
         <script>
             const userPic = <?= json_encode($user_picture, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
         </script>
-        <script src="app.js?v=<?= time() ?>"></script> 
+        <script src="app.js?v=<?= time() ?>"></script>
     <?php endif; ?>
 
     <script>
@@ -614,10 +628,18 @@ $user_picture = (isset($_SESSION['user_picture']) && $_SESSION['user_picture'] !
             };
 
             updateViewportHeight();
-            window.addEventListener('resize', updateViewportHeight, { passive: true });
-            window.addEventListener('orientationchange', updateViewportHeight, { passive: true });
-            window.visualViewport?.addEventListener('resize', updateViewportHeight, { passive: true });
-            window.visualViewport?.addEventListener('scroll', updateViewportHeight, { passive: true });
+            window.addEventListener('resize', updateViewportHeight, {
+                passive: true
+            });
+            window.addEventListener('orientationchange', updateViewportHeight, {
+                passive: true
+            });
+            window.visualViewport?.addEventListener('resize', updateViewportHeight, {
+                passive: true
+            });
+            window.visualViewport?.addEventListener('scroll', updateViewportHeight, {
+                passive: true
+            });
 
             window.addEventListener('load', () => {
                 updateViewportHeight();
