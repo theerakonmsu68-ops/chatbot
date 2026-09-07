@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let isGenerating = false;
 
     // =====================================================
-    // Security Escape HTML & YouTube Embed Parser
+    // Security Escape HTML & YouTube Embed Parser (Gemini Style)
     // =====================================================
     function escapeHTML(str) {
         if (!str) return "";
@@ -75,13 +75,13 @@ document.addEventListener('DOMContentLoaded', () => {
         let match;
         const videoIds = new Set();
 
-        // สะสมคลิป YouTube (ล็อกความกว้างบาลานซ์ที่ 280px - 320px พอดีกับ UI)
+        // สะสมคลิป YouTube (ปรับสไตล์การ์ดขยายกว้างบาลานซ์สไตล์ Gemini)
         while ((match = youtubeRegex.exec(text)) !== null) {
             if (match[1] && !videoIds.has(match[1])) {
                 videoIds.add(match[1]);
                 const videoId = match[1];
                 videoCards += `
-                    <div class="my-2.5 overflow-hidden rounded-2xl border border-slate-200/80 bg-slate-900 shadow-sm w-full max-w-[280px] sm:max-w-[320px]">
+                    <div class="mt-3 mb-1 overflow-hidden rounded-2xl border border-slate-200/90 bg-slate-900 shadow-md w-full max-w-[480px]">
                         <div class="relative w-full aspect-video">
                             <iframe class="absolute top-0 left-0 w-full h-full rounded-2xl" 
                                 src="https://www.youtube-nocookie.com/embed/${videoId}?autoplay=0&rel=0" 
@@ -97,7 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // ลบลิงก์ YouTube ออกจากตัวข้อความ เพื่อไม่ให้ข้อความยาวหรือซ้ำซ้อน
+        // ลบลิงก์ YouTube ออกจากตัวข้อความ เพื่อไม่ให้ซ้ำซ้อน
         const cleanText = text.replace(youtubeRegex, '').trim();
 
         // Escape HTML สำหรับข้อความปกติ
@@ -291,7 +291,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const parsedContent = sender === 'user' ? escapeHTML(text).replace(/\n/g, '<br>') : linkify(text);
 
         wrapper.innerHTML = `
-            <div class="flex ${sender === 'user' ? 'flex-row-reverse' : 'flex-row'} gap-3 items-start">
+            <div class="flex ${sender === 'user' ? 'flex-row-reverse' : 'flex-row'} gap-3 items-start w-full">
                 <div class="shrink-0 mt-1">
                     ${avatar}
                 </div>
@@ -398,7 +398,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // =====================================================
-    // Update Sidebar Realtime (แสดงปุ่มลบตลอดเวลา)
+    // Update Sidebar Realtime
     // =====================================================
     function updateSidebarRealtime(chatId, message) {
         const historyList = document.getElementById('history-list');
