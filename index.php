@@ -392,7 +392,7 @@ $user_picture = (isset($_SESSION['user_picture']) && $_SESSION['user_picture'] !
     </div>
 
     <?php if (!$is_logged_in): ?>
-        <!-- หน้าเข้าสู่ระบบ (ปรับปรุงปุ่ม Guest สวยไฮเอนด์) -->
+        <!-- หน้าเข้าสู่ระบบ -->
         <div class="login-screen fixed inset-0 flex flex-col items-center justify-center px-4 sm:px-6 z-[999]">
             <div class="w-full max-w-sm sm:max-w-md flex flex-col items-center text-center my-auto py-6">
                 <!-- โลโก้คณะ -->
@@ -427,7 +427,7 @@ $user_picture = (isset($_SESSION['user_picture']) && $_SESSION['user_picture'] !
                         <span>เข้าสู่ระบบด้วย Google Account</span>
                     </a>
 
-                    <!-- ปุ่ม Guest Login (ปรับแต่งให้สวยหรู ละมุน พรีเมียม) -->
+                    <!-- ปุ่ม Guest Login -->
                     <a href="index.php?guest=true"
                         class="w-full py-3.5 px-6 bg-slate-900/5 hover:bg-slate-900/10 active:bg-slate-900/15 text-slate-700 border border-slate-200/60 hover:border-slate-300/80 rounded-full flex items-center justify-center gap-2.5 transition-all duration-200 font-semibold text-xs sm:text-sm backdrop-blur-sm active:scale-[0.98] group">
                         <div class="w-6 h-6 rounded-full bg-slate-200/80 group-hover:bg-slate-300/80 flex items-center justify-center text-slate-600 transition-colors">
@@ -500,8 +500,9 @@ LIMIT 20");
                             <span onclick="loadChat('<?= $row['chat_id'] ?>')" class="truncate flex-1 font-medium pr-2">
                                 <?= htmlspecialchars($row['message']) ?>
                             </span>
+                            <!-- ปรับแก้ให้ปุ่มลบโชว์ตลอดเวลา -->
                             <button type="button" aria-label="ลบการสนทนา" onclick="deleteChat('<?= $row['chat_id'] ?>')"
-                                class="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-red-500 transition-opacity rounded-lg hover:bg-red-50">
+                                class="p-1 text-slate-400 hover:text-red-500 transition-colors rounded-lg hover:bg-red-50">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <polyline points="3 6 5 6 21 6"></polyline>
                                     <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
