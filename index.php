@@ -21,26 +21,27 @@ $is_logged_in = isset($_SESSION['user_id']);
 $user_name = $_SESSION['user_name'] ?? "User";
 $user_picture = (isset($_SESSION['user_picture']) && $_SESSION['user_picture'] != "")
     ? $_SESSION['user_picture']
-    : "https://ui-avatars.com/api/?name=" . urlencode($user_name) . "&background=0D8ABC&color=fff";
+    : "https://ui-avatars.com/api/?name=" . urlencode($user_name);
 ?>
 <!DOCTYPE html>
-<html lang="th" class="h-full">
+<html lang="th">
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="referrer" content="no-referrer">
-    <title>พี่สารคาม AI - Mahasarakham University</title>
+    <title>Chatbot IT - Mahasarakham University</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link href="https://upload.wikimedia.org/wikipedia/th/b/bb/Informatics_MSU_Logo.svg" rel="icon">
 
     <style>
         :root {
             --app-height: 100vh;
             --sidebar-width: 18rem;
-            --page-gutter: clamp(0.75rem, 4vw, 2.5rem);
+            --page-gutter: clamp(0.75rem, 3vw, 3rem);
         }
 
         @supports (height: 100dvh) {
@@ -49,95 +50,215 @@ $user_picture = (isset($_SESSION['user_picture']) && $_SESSION['user_picture'] !
             }
         }
 
-        *, *::before, *::after {
+        *,
+        *::before,
+        *::after {
             box-sizing: border-box;
+        }
+
+        html {
+            width: 100%;
+            height: 100%;
+            -webkit-text-size-adjust: 100%;
+            text-size-adjust: 100%;
+        }
+
+        body {
+            width: 100%;
+            min-width: 0;
+            height: var(--app-height);
+            min-height: var(--app-height);
+            margin: 0;
+            font-family: 'Inter', 'Sarabun', sans-serif;
+            background: #fff;
+            color: #1f1f1f;
+            opacity: 1;
+            overflow: hidden;
+            transition: opacity 0.4s ease-in-out;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body.loaded {
+            opacity: 1;
+        }
+
+        button,
+        textarea,
+        a {
             -webkit-tap-highlight-color: transparent;
         }
 
-        html, body {
-            width: 100%;
-            height: var(--app-height);
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            font-family: 'Plus Jakarta Sans', 'Sarabun', sans-serif;
-            background-color: #f8fafc;
-            color: #0f172a;
-            -webkit-font-smoothing: antialiased;
+        button,
+        a {
+            touch-action: manipulation;
         }
 
-        /* Responsive Layout Engine */
-        .app-viewport {
-            display: flex;
-            width: 100%;
-            height: var(--app-height);
-            min-height: -webkit-fill-available;
-            overflow: hidden;
-            position: relative;
+        img,
+        video,
+        canvas,
+        svg {
+            max-width: 100%;
         }
 
-        /* Gradient Effects */
         .gemini-gradient {
-            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 50%, #db2777 100%);
+            background: linear-gradient(70deg, #4285f4, #9b72cb, #d96570);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
+            color: transparent;
         }
 
-        .login-bg-glow {
-            background: radial-gradient(circle at 50% 0%, rgba(37, 99, 235, 0.12) 0%, rgba(124, 58, 237, 0.06) 50%, transparent 100%);
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
-        /* Custom Scrollbar */
+        .msg-animate {
+            animation: slideUp 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        .sidebar-item {
+            min-width: 0;
+            transition: background-color 0.2s ease, transform 0.2s ease;
+            border-radius: 12px;
+        }
+
+        .sidebar-item:hover {
+            background: #f0f4f9;
+        }
+
+        .custom-scrollbar {
+            scrollbar-width: thin;
+            scrollbar-color: #d8dee8 transparent;
+            overscroll-behavior: contain;
+        }
+
         .custom-scrollbar::-webkit-scrollbar {
-            width: 4px;
-            height: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 99px;
+            width: 5px;
+            height: 5px;
         }
 
-        /* Sidebar Responsive */
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #d8dee8;
+            border-radius: 10px;
+        }
+
+        .chat-container {
+            height: auto;
+            min-height: 0;
+            scroll-behavior: smooth;
+            overflow-x: hidden;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
         #sidebar {
-            width: min(var(--sidebar-width), calc(100vw - 2.5rem));
+            width: min(var(--sidebar-width), calc(100vw - 3rem));
+            max-width: 100%;
             height: var(--app-height);
             padding-top: max(1rem, env(safe-area-inset-top));
             padding-bottom: max(1rem, env(safe-area-inset-bottom));
-            padding-left: max(1rem, env(safe-area-inset-left));
         }
 
-        /* Main Chat Responsive Boundaries */
         #chat-box {
             padding-left: var(--page-gutter);
             padding-right: var(--page-gutter);
-            padding-top: 1rem;
-            scroll-behavior: smooth;
         }
 
-        #welcome, #msg-container, .composer-inner {
+        #welcome,
+        #msg-container,
+        .composer-inner {
             width: 100%;
             max-width: 48rem;
-            margin-left: auto;
-            margin-right: auto;
+        }
+
+        #welcome h1 {
+            font-size: clamp(1.75rem, 7vw, 3rem);
+            line-height: 1.12;
+            overflow-wrap: anywhere;
+        }
+
+        #welcome p {
+            font-size: clamp(1rem, 4.2vw, 1.5rem);
+        }
+
+        #msg-container,
+        #msg-container * {
+            min-width: 0;
+        }
+
+        #msg-container p,
+        #msg-container li,
+        #msg-container div,
+        #msg-container span {
+            overflow-wrap: anywhere;
+            word-break: break-word;
+        }
+
+        #msg-container pre {
+            max-width: 100%;
+            overflow-x: auto;
+            white-space: pre;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        #msg-container code {
+            overflow-wrap: normal;
+            word-break: normal;
+        }
+
+        #msg-container table {
+            display: block;
+            width: 100%;
+            max-width: 100%;
+            overflow-x: auto;
+            border-collapse: collapse;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        #msg-container img,
+        #msg-container video,
+        #msg-container iframe {
+            max-width: 100%;
+            height: auto;
+            border-radius: 12px;
+        }
+
+        .mobile-header {
+            padding-top: max(0.75rem, env(safe-area-inset-top));
         }
 
         .composer-shell {
-            padding-left: var(--page-gutter);
-            padding-right: var(--page-gutter);
-            padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+            flex: 0 0 auto;
+            padding: 0.75rem var(--page-gutter) max(0.75rem, env(safe-area-inset-bottom));
         }
 
-        /* Textarea Auto-wrap Fix */
         #user-input {
-            font-size: 16px; /* Prevent Safari Auto-zoom */
+            min-width: 0;
+            width: 100%;
+            min-height: 48px;
+            font-size: 16px;
             line-height: 1.5;
         }
 
-        /* Modal Responsive */
+        #send-btn {
+            width: 48px;
+            height: 48px;
+            min-width: 48px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Modal */
         .custom-modal-backdrop {
             position: fixed;
             inset: 0;
@@ -146,11 +267,10 @@ $user_picture = (isset($_SESSION['user_picture']) && $_SESSION['user_picture'] !
             align-items: center;
             justify-content: center;
             padding: max(1rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right)) max(1rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
-            background-color: rgba(15, 23, 42, 0.45);
-            backdrop-filter: blur(4px);
+            background-color: rgba(0, 0, 0, 0.4);
             opacity: 0;
             pointer-events: none;
-            transition: all 0.25s ease-in-out;
+            transition: opacity 0.25s cubic-bezier(0.2, 0, 0, 1);
         }
 
         .custom-modal-backdrop.active {
@@ -159,19 +279,52 @@ $user_picture = (isset($_SESSION['user_picture']) && $_SESSION['user_picture'] !
         }
 
         .custom-modal-box {
-            width: min(100%, 380px);
+            width: min(100%, 360px);
             max-height: calc(var(--app-height) - 2rem);
             overflow-y: auto;
             padding: 24px;
-            background: #ffffff;
-            border-radius: 24px;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-            transform: scale(0.95) translateY(10px);
-            transition: all 0.25s ease-in-out;
+            background: #fff;
+            border-radius: 28px;
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+            transform: scale(0.9) translateY(10px);
+            transition: transform 0.25s cubic-bezier(0.2, 0, 0, 1);
         }
 
         .custom-modal-backdrop.active .custom-modal-box {
             transform: scale(1) translateY(0);
+        }
+
+        #gemini-toast {
+            max-width: min(28rem, calc(100vw - 2rem));
+            right: max(1rem, env(safe-area-inset-right));
+            bottom: max(1rem, env(safe-area-inset-bottom));
+            overflow-wrap: anywhere;
+        }
+
+        /* Style ปรับแต่งพิเศษสำหรับหน้า Login ให้สวยหรู */
+        .login-screen {
+            min-height: var(--app-height);
+            padding-top: max(1.5rem, env(safe-area-inset-top));
+            padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
+            overflow-y: auto;
+            background: radial-gradient(circle at 50% 0%, rgba(66, 133, 244, 0.12) 0%, rgba(155, 114, 203, 0.05) 50%, #ffffff 100%);
+        }
+
+        @media (min-width: 768px) {
+            #sidebar {
+                width: var(--sidebar-width);
+                min-width: var(--sidebar-width);
+            }
+
+            #chat-box {
+                padding-top: clamp(1.5rem, 5vh, 3rem);
+                padding-bottom: 1.5rem;
+            }
+
+            .composer-shell {
+                padding-top: 0.5rem;
+                padding-bottom: max(2rem, env(safe-area-inset-bottom));
+            }
         }
 
         @media (max-width: 767.98px) {
@@ -183,6 +336,8 @@ $user_picture = (isset($_SESSION['user_picture']) && $_SESSION['user_picture'] !
             .custom-modal-box {
                 width: 100%;
                 max-width: 100%;
+                max-height: min(85dvh, calc(var(--app-height) - 1rem));
+                padding: 24px 20px max(24px, calc(env(safe-area-inset-bottom) + 16px));
                 border-radius: 28px 28px 0 0;
                 transform: translateY(100%);
             }
@@ -190,61 +345,155 @@ $user_picture = (isset($_SESSION['user_picture']) && $_SESSION['user_picture'] !
             .custom-modal-backdrop.active .custom-modal-box {
                 transform: translateY(0);
             }
+
+            #chat-box {
+                padding-top: 1rem;
+                padding-bottom: 1rem;
+            }
+
+            #welcome {
+                margin-top: clamp(1.5rem, 8vh, 4rem);
+            }
+
+            #msg-container {
+                padding-bottom: 0.5rem;
+            }
+
+            #gemini-toast {
+                left: 50%;
+                right: auto;
+                bottom: max(0.75rem, env(safe-area-inset-bottom));
+                width: max-content;
+                transform: translate(-50%, 0);
+            }
+
+            #gemini-toast.translate-y-20 {
+                transform: translate(-50%, 5rem);
+            }
+        }
+
+        @media (max-width: 380px) {
+            :root {
+                --page-gutter: 0.65rem;
+            }
+
+            #sidebar {
+                width: calc(100vw - 1.5rem);
+            }
+
+            .composer-shell {
+                padding-top: 0.5rem;
+            }
+
+            #user-input {
+                padding-left: 0.75rem;
+                padding-right: 0.5rem;
+            }
+
+            #send-btn {
+                width: 44px;
+                height: 44px;
+                min-width: 44px;
+                padding: 0.75rem;
+            }
+
+            .custom-modal-box {
+                border-radius: 22px 22px 0 0;
+            }
+        }
+
+        @media (max-height: 500px) and (orientation: landscape) {
+            #welcome {
+                margin-top: 0.5rem;
+            }
+
+            #welcome h1 {
+                margin-bottom: 0.5rem;
+            }
+
+            .mobile-header {
+                padding-top: max(0.35rem, env(safe-area-inset-top));
+                padding-bottom: 0.35rem;
+            }
+
+            .composer-shell {
+                padding-top: 0.35rem;
+                padding-bottom: max(0.35rem, env(safe-area-inset-bottom));
+            }
+        }
+
+        @media (hover: none),
+        (pointer: coarse) {
+            .sidebar-item button {
+                opacity: 1 !important;
+                min-width: 36px;
+                min-height: 36px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                scroll-behavior: auto !important;
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
         }
     </style>
 </head>
 
-<body class="bg-white">
+<body class="flex w-full overflow-hidden bg-white">
 
-    <!-- Modal ยืนยันการลบ -->
     <div id="gemini-delete-modal" class="custom-modal-backdrop">
-        <div class="custom-modal-box border border-slate-100">
-            <div class="w-12 h-12 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center mb-4">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-            </div>
-            <h3 class="text-lg font-bold text-slate-900 mb-1">ลบการสนทนานี้ใช่หรือไม่?</h3>
-            <p class="text-sm text-slate-500 leading-relaxed mb-6">ประวัติการแชททั้งหมดในห้องนี้จะถูกลบออกจากบัญชีของคุณอย่างถาวร ไม่สามารถกู้คืนได้</p>
-            <div class="flex items-center justify-end gap-2">
-                <button type="button" id="modal-cancel-btn" class="px-5 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-full transition-colors">
+        <div class="custom-modal-box">
+            <h3 class="text-xl font-medium text-[#1f1f1f] mb-3 tracking-tight">ลบการสนทนานี้ใช่หรือไม่?</h3>
+            <p class="text-sm text-[#444746] leading-relaxed mb-6">ประวัติการแชททั้งหมดในห้องนี้จะถูกลบออกจากบัญชีของคุณอย่างถาวรและไม่สามารถเรียกคืนได้</p>
+            <div class="flex flex-wrap justify-end gap-1.5">
+                <button type="button" id="modal-cancel-btn" class="px-5 py-2.5 text-sm font-medium text-[#0b57d0] rounded-full hover:bg-[#f1f3f4] active:bg-[#e8eaed] transition-colors duration-200">
                     ยกเลิก
                 </button>
-                <button type="button" id="modal-confirm-btn" class="px-5 py-2.5 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 rounded-full shadow-sm shadow-red-200 transition-colors">
-                    ลบข้อมูล
+                <button type="button" id="modal-confirm-btn" class="px-6 py-2.5 text-sm font-semibold text-[#062e6f] bg-[#a8c7fa] rounded-full hover:bg-[#9bc1f9] active:bg-[#7ca9f4] transition-colors duration-200 shadow-sm">
+                    ลบ
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- Toast แจ้งเตือน -->
-    <div id="gemini-toast" class="fixed bottom-5 right-5 z-[110] bg-slate-900 text-white text-xs font-medium px-5 py-3 rounded-2xl shadow-2xl border border-slate-800 translate-y-20 opacity-0 transition-all duration-300 pointer-events-none flex items-center gap-2">
-        <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-        ลบห้องสนทนาเรียบร้อยแล้ว
+    <div id="gemini-toast" class="fixed bottom-4 right-4 z-[110] bg-gray-900 text-white text-xs px-5 py-3 rounded-xl shadow-xl translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+        ลบการสนทนาเรียบร้อยแล้ว
     </div>
 
     <?php if (!$is_logged_in): ?>
-        <!-- Login Screen (Fully Responsive) -->
-        <div class="login-screen login-bg-glow fixed inset-0 bg-white flex flex-col items-center justify-center px-4 sm:px-6 z-[999] overflow-y-auto">
+        <!-- ปรับแต่งหน้าเข้าสู่ระบบใหม่ให้สวยงาม ทันสมัย ชวนใช้งาน -->
+        <div class="login-screen fixed inset-0 flex flex-col items-center justify-center px-4 sm:px-6 z-[999]">
             <div class="w-full max-w-sm sm:max-w-md flex flex-col items-center text-center my-auto py-6">
-                <!-- Logo Frame -->
-                <div class="w-16 h-16 sm:w-20 sm:h-20 p-3 sm:p-4 bg-white border border-slate-100 rounded-2xl sm:rounded-3xl mb-5 flex items-center justify-center shadow-xl shadow-blue-500/10 ring-4 sm:ring-8 ring-blue-50/50">
+                <!-- กรอบโลโก้ Glassmorphic -->
+                <div class="w-20 h-20 sm:w-24 sm:h-24 p-4 bg-white/90 border border-slate-100 rounded-[2.2rem] mb-6 flex items-center justify-center shadow-xl shadow-blue-500/10 ring-8 ring-blue-50/60 backdrop-blur-md">
                     <img src="https://upload.wikimedia.org/wikipedia/th/b/bb/Informatics_MSU_Logo.svg" alt="MSU Logo" class="w-full h-full object-contain">
                 </div>
 
-                <!-- Titles -->
-                <span class="px-3 py-1 bg-blue-50 text-blue-600 text-[11px] sm:text-xs font-bold rounded-full mb-3 tracking-wide uppercase border border-blue-100">
+                <!-- ป้ายคณะ/มหาวิทยาลัย -->
+                <span class="px-3.5 py-1 bg-blue-50 text-blue-600 text-xs font-bold rounded-full mb-3 tracking-wider uppercase border border-blue-100/80 shadow-xs">
                     Mahasarakham University
                 </span>
-                <h1 class="text-2xl sm:text-4xl font-extrabold text-slate-900 tracking-tight mb-2">
+
+                <!-- ชื่อโปรแกรม -->
+                <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight mb-2">
                     พี่สารคาม <span class="gemini-gradient">AI</span>
                 </h1>
-                <p class="text-slate-500 text-xs sm:text-sm mb-6 sm:mb-8 max-w-xs leading-relaxed">
-                    ผู้ช่วยอัจฉริยะระบบสารสนเทศและการเรียนรู้ มหาวิทยาลัยมหาสารคาม
+                <p class="text-slate-500 text-xs sm:text-sm mb-8 max-w-xs leading-relaxed font-normal">
+                    ระบบผู้ช่วยอัจฉริยะประมวลผลข้อมูล คณะสารสนเทศศาสตร์ มหาวิทยาลัยมหาสารคาม
                 </p>
 
-                <!-- Login Button -->
+                <!-- ปุ่ม Google Login แบบ Modern -->
                 <a href="<?= $google_login_url ?>"
-                    class="w-full py-3 sm:py-3.5 px-5 bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-300 rounded-full flex items-center justify-center gap-3 transition-all duration-200 shadow-sm hover:shadow-md active:scale-[0.98] text-slate-700 font-semibold text-xs sm:text-sm">
-                    <svg class="w-4 h-4 sm:w-5 sm:h-5 shrink-0" viewBox="0 0 24 24">
+                    class="w-full py-3.5 px-6 bg-white hover:bg-slate-50 border border-slate-200/90 hover:border-slate-300 rounded-full flex items-center justify-center gap-3 transition-all duration-200 shadow-sm hover:shadow-md active:scale-[0.98] text-slate-700 font-semibold text-sm sm:text-base">
+                    <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24">
                         <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                         <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
                         <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
@@ -254,133 +503,127 @@ $user_picture = (isset($_SESSION['user_picture']) && $_SESSION['user_picture'] !
                 </a>
 
                 <?php if (isset($_GET['error'])): ?>
-                    <div class="mt-4 p-3 bg-red-50 text-red-600 rounded-2xl text-xs border border-red-100 max-w-xs text-center font-medium">
-                        เข้าสู่ระบบไม่สำเร็จ โปรดลองใหม่อีกครั้ง
+                    <div class="mt-4 p-3.5 bg-red-50 text-red-600 rounded-2xl text-xs border border-red-100 max-w-xs text-center font-medium">
+                        <strong>เข้าสู่ระบบไม่สำเร็จ:</strong> โปรดตรวจสอบบัญชี Google แล้วลองใหม่อีกครั้ง
                     </div>
                 <?php endif; ?>
 
-                <p class="mt-8 sm:mt-12 text-[11px] text-slate-400">
-                    &copy; <?= date('Y') ?> IT Mahasarakham University
+                <p class="mt-12 text-[11px] text-slate-400">
+                    &copy; <?= date('Y') ?> IT Mahasarakham University. All rights reserved.
                 </p>
             </div>
         </div>
     <?php else: ?>
-        <!-- Main Application Layout -->
-        <div class="app-viewport">
-            <div id="overlay" class="fixed inset-0 bg-slate-900/30 z-[55] hidden backdrop-blur-xs transition-opacity duration-300"></div>
+        <div id="overlay" class="fixed inset-0 bg-black/20 z-[55] hidden backdrop-blur-sm transition-opacity duration-300"></div>
 
-            <!-- Sidebar Panel -->
-            <aside id="sidebar"
-                class="bg-slate-50/95 backdrop-blur-md border-r border-slate-200/80 fixed inset-y-0 left-0 z-[60] transform -translate-x-full md:relative md:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col p-4 shrink-0">
-                
-                <!-- Sidebar Header -->
-                <div class="flex items-center justify-between mb-4">
-                    <div class="flex items-center gap-2.5 px-1">
-                        <div class="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold shadow-md shadow-blue-500/20">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                        </div>
-                        <span class="font-bold text-slate-800 text-base">พี่สารคาม AI</span>
-                    </div>
-                    <button type="button" id="close-sidebar" aria-label="ปิดเมนู" class="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-200/60 rounded-xl md:hidden transition-colors">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                    </button>
-                </div>
-
-                <!-- New Chat Button -->
-                <button type="button" onclick="newChat()"
-                    class="w-full py-2.5 px-4 mb-4 bg-white hover:bg-slate-100/80 border border-slate-200/80 rounded-2xl text-xs sm:text-sm font-semibold text-slate-700 shadow-sm transition-all flex items-center justify-center gap-2 active:scale-[0.98]">
-                    <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
-                    <span>สร้างการสนทนาใหม่</span>
+        <aside id="sidebar"
+            class="w-72 bg-[#f8fafc] border-r border-gray-200 fixed inset-y-0 left-0 z-[60] transform -translate-x-full md:relative md:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col p-4">
+            <div class="flex items-center justify-between mb-5 md:hidden">
+                <span class="font-bold gemini-gradient text-lg">เมนูระบบ</span>
+                <button type="button" id="close-sidebar" aria-label="ปิดเมนู" class="p-2 text-gray-500 hover:bg-gray-200 rounded-full transition-colors">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
                 </button>
+            </div>
 
-                <!-- Chat History List -->
-                <div class="flex-1 overflow-y-auto custom-scrollbar space-y-1 pr-1">
-                    <p class="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider px-2 mb-2">ประวัติการแชท</p>
-                    <div id="history-list" class="space-y-1">
-                        <?php
-                        $stmt = $conn->prepare("SELECT chat_id, MAX(message) AS message, MAX(id) AS id FROM chat_history WHERE user_id = ? GROUP BY chat_id ORDER BY id DESC LIMIT 25");
-                        $stmt->bind_param("s", $_SESSION['user_id']);
-                        $stmt->execute();
-                        $res = $stmt->get_result();
-                        while ($row = $res->fetch_assoc()): ?>
-                            <div id="item-<?= $row['chat_id'] ?>"
-                                class="sidebar-item group flex items-center justify-between p-2.5 text-xs sm:text-sm text-slate-600 cursor-pointer rounded-xl transition-all hover:bg-slate-200/60">
-                                <span onclick="loadChat('<?= $row['chat_id'] ?>')" class="truncate flex-1 font-medium pr-2">
-                                    <?= htmlspecialchars($row['message']) ?>
-                                </span>
-                                <button type="button" aria-label="ลบการสนทนา" onclick="deleteChat('<?= $row['chat_id'] ?>', event)"
-                                    class="opacity-100 md:opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-red-500 rounded-lg hover:bg-red-50 transition-all">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                </button>
-                            </div>
-                        <?php endwhile;
-                        $stmt->close();
-                        $conn->close(); ?>
-                    </div>
-                </div>
+            <button type="button" onclick="newChat()"
+                class="w-full py-3 mb-4 bg-white border border-gray-200 rounded-2xl text-sm font-medium shadow-sm hover:shadow-md hover:border-gray-300 transition-all flex items-center justify-center gap-2 active:scale-95 text-gray-700">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                การสนทนาใหม่
+            </button>
 
-                <!-- User Profile Footer -->
-                <div class="mt-auto pt-3 border-t border-slate-200/80 flex items-center gap-3">
-                    <div class="relative shrink-0">
-                        <img src="<?= htmlspecialchars($user_picture, ENT_QUOTES, 'UTF-8') ?>" referrerpolicy="no-referrer"
-                            class="w-9 h-9 rounded-full border border-slate-200 object-cover shadow-sm"
-                            onerror="this.src='https://ui-avatars.com/api/?name=User'">
-                        <span class="w-2.5 h-2.5 bg-emerald-500 border-2 border-white rounded-full absolute bottom-0 right-0"></span>
-                    </div>
-                    <div class="flex-1 min-w-0">
-                        <p class="text-xs font-bold text-slate-800 truncate"><?= htmlspecialchars($user_name, ENT_QUOTES, 'UTF-8') ?></p>
-                        <a href="logout.php" class="text-[11px] text-red-500 font-medium hover:underline flex items-center gap-1">
-                            <span>ออกจากระบบ</span>
-                        </a>
-                    </div>
-                </div>
-            </aside>
-
-            <!-- Main Chat Surface -->
-            <main class="flex-1 w-full flex flex-col relative bg-white min-w-0 h-full overflow-hidden">
-                <!-- Mobile Top Header Bar -->
-                <header class="mobile-header md:hidden flex-none flex items-center justify-between px-3 py-2.5 border-b border-slate-100 bg-white/90 backdrop-blur-md">
-                    <button type="button" id="open-sidebar" aria-label="เปิดเมนู" class="p-2 text-slate-600 hover:bg-slate-100 rounded-xl transition-colors">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
-                    </button>
-                    <span class="font-extrabold gemini-gradient text-base sm:text-lg tracking-tight">พี่สารคาม AI</span>
-                    <button type="button" onclick="newChat()" class="p-2 text-blue-600 hover:bg-blue-50 rounded-xl transition-colors">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
-                    </button>
-                </header>
-
-                <!-- Scrollable Messages Area -->
-                <div id="chat-box" class="flex-1 min-h-0 custom-scrollbar overflow-y-auto">
-                    <!-- Welcome Hero Screen -->
-                    <div id="welcome" class="mx-auto mt-8 sm:mt-16 md:mt-24 text-left">
-                        <h1 class="text-2xl sm:text-4xl md:text-5xl font-extrabold mb-3 tracking-tight">
-                            <span class="gemini-gradient">สวัสดีครับ, คุณ<?= htmlspecialchars(explode(' ', trim($user_name))[0] ?? 'User', ENT_QUOTES, 'UTF-8') ?></span>
-                        </h1>
-                        <p class="text-base sm:text-xl md:text-2xl text-slate-400 font-light leading-relaxed">
-                            มีคำถามเกี่ยวกับตารางเรียน การใช้งานระบบ หรือข้อสงสัยใดๆ ให้พี่สารคามช่วยดูแลไหมครับ?
-                        </p>
-                    </div>
-
-                    <!-- Conversation Bubbles Container -->
-                    <div id="msg-container" class="mx-auto space-y-4 sm:space-y-6 pb-4"></div>
-                </div>
-
-                <!-- Fixed Composer Shell Bar -->
-                <div class="composer-shell flex-none bg-gradient-to-t from-white via-white to-transparent pt-2">
-                    <div class="composer-inner mx-auto relative">
-                        <div class="flex items-end gap-2 p-1.5 sm:p-2 bg-slate-100/90 hover:bg-slate-100 focus-within:bg-white border border-slate-200/80 focus-within:border-blue-400 rounded-[24px] sm:rounded-[28px] focus-within:ring-4 focus-within:ring-blue-500/10 transition-all duration-200 shadow-sm">
-                            <textarea id="user-input" rows="1" placeholder="ถามพี่สารคามได้เลย..."
-                                class="flex-1 min-w-0 bg-transparent border-none outline-none py-2 px-2.5 sm:px-4 resize-none max-h-32 sm:max-h-36 text-slate-800 placeholder-slate-400 text-sm sm:text-base leading-relaxed custom-scrollbar" style="height: auto;"></textarea>
-                            
-                            <button type="button" id="send-btn" aria-label="ส่งข้อความ"
-                                class="p-2.5 sm:p-3 bg-blue-600 text-white rounded-full hover:bg-blue-700 active:scale-95 transition-all shadow-md shadow-blue-500/20 shrink-0 disabled:opacity-50 disabled:cursor-not-allowed">
-                                <svg class="w-4 h-4 sm:w-5 sm:h-5 transform rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 19V5m0 0l-7 7m7-7l7 7"/></svg>
+            <div class="flex-1 overflow-y-auto space-y-1 custom-scrollbar pr-1">
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-2 mb-2">ประวัติการสนทนาล่าสุด</p>
+                <div id="history-list" class="space-y-1">
+                    <?php
+                    $stmt = $conn->prepare("SELECT 
+    chat_id,
+    MAX(message) AS message,
+    MAX(id) AS id
+FROM chat_history
+WHERE user_id = ?
+GROUP BY chat_id
+ORDER BY id DESC
+LIMIT 20");
+                    $stmt->bind_param("s", $_SESSION['user_id']);
+                    $stmt->execute();
+                    $res = $stmt->get_result();
+                    while ($row = $res->fetch_assoc()): ?>
+                        <div id="item-<?= $row['chat_id'] ?>"
+                            class="sidebar-item group flex items-center justify-between p-3 text-sm text-gray-600 cursor-pointer rounded-xl transition-all hover:bg-gray-100">
+                            <span onclick="loadChat('<?= $row['chat_id'] ?>')" class="truncate flex-1 font-medium pr-2">
+                                <?= htmlspecialchars($row['message']) ?>
+                            </span>
+                            <button type="button" aria-label="ลบการสนทนา" onclick="deleteChat('<?= $row['chat_id'] ?>')"
+                                class="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-red-500 transition-opacity">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="3 6 5 6 21 6"></polyline>
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                </svg>
                             </button>
                         </div>
+                    <?php endwhile;
+                    $stmt->close();
+                    $conn->close(); ?>
+                </div>
+            </div>
+
+            <div class="mt-auto pt-4 border-t border-gray-200 flex items-center gap-3">
+                <img src="<?= htmlspecialchars($user_picture, ENT_QUOTES, 'UTF-8') ?>" referrerpolicy="no-referrer"
+                    class="w-10 h-10 rounded-full border border-gray-200 shadow-sm object-cover"
+                    onerror="this.src='https://ui-avatars.com/api/?name=User'">
+                <div class="flex-1 min-w-0">
+                    <p class="text-xs font-semibold truncate text-gray-700"><?= htmlspecialchars($user_name, ENT_QUOTES, 'UTF-8') ?></p>
+                    <a href="logout.php" class="text-[10px] text-red-500 font-medium hover:underline">ออกจากระบบ</a>
+                </div>
+            </div>
+        </aside>
+
+        <main class="flex-1 w-full flex flex-col relative bg-white min-w-0 min-h-0 overflow-hidden">
+            <header class="mobile-header md:hidden flex-none flex items-center justify-between px-3 py-2.5 border-b bg-white">
+                <button type="button" id="open-sidebar" aria-label="เปิดเมนู" class="p-2 text-gray-600 hover:bg-gray-100 rounded-full transition-colors">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
+                <span class="font-bold gemini-gradient text-lg">Chatbot IT</span>
+                <div class="w-10"></div>
+            </header>
+
+            <div id="chat-box" class="flex-1 min-h-0 chat-container custom-scrollbar">
+                <div id="welcome" class="mx-auto mt-12 md:mt-20 px-1 sm:px-2">
+                    <h1 class="text-4xl md:text-5xl font-medium mb-4 tracking-tight">
+                        <span class="gemini-gradient font-bold">สวัสดีครับคุณ <?= htmlspecialchars(explode(' ', trim($user_name))[0] ?? 'User', ENT_QUOTES, 'UTF-8') ?></span>
+                    </h1>
+                    <p class="text-xl md:text-2xl text-gray-300 font-light leading-relaxed">
+                        มีเรื่องอะไรให้พี่สารคามช่วยดูแลหรือแนะนำในวันนี้ไหมครับ?
+                    </p>
+                </div>
+                <div id="msg-container" class="mx-auto space-y-6 sm:space-y-8 pb-4 sm:pb-8"></div>
+            </div>
+
+            <div class="composer-shell bg-white border-t md:border-t-0 border-gray-100">
+                <div class="composer-inner mx-auto relative">
+                    <div class="flex min-w-0 items-end gap-1.5 sm:gap-2 p-1.5 bg-[#f0f4f9] rounded-[28px] focus-within:bg-white focus-within:ring-1 focus-within:ring-gray-200 focus-within:shadow-lg transition-all duration-300">
+                        <textarea id="user-input" rows="1" placeholder="ถามพี่สารคามได้เลย..."
+                            class="flex-1 min-w-0 bg-transparent border-none outline-none py-3 px-3 sm:px-4 resize-none max-h-36 text-gray-700 custom-scrollbar" style="height: auto;"></textarea>
+                        <button type="button" id="send-btn" aria-label="ส่งข้อความ"
+                            class="mb-0.5 p-3 bg-blue-600 text-white rounded-full hover:bg-blue-700 active:scale-90 transition-all shadow-sm shrink-0">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
+                            </svg>
+                        </button>
                     </div>
                 </div>
-            </main>
-        </div>
+            </div>
+        </main>
 
         <script>
             const userPic = <?= json_encode($user_picture, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
@@ -396,10 +639,18 @@ $user_picture = (isset($_SESSION['user_picture']) && $_SESSION['user_picture'] !
             };
 
             updateViewportHeight();
-            window.addEventListener('resize', updateViewportHeight, { passive: true });
-            window.addEventListener('orientationchange', updateViewportHeight, { passive: true });
-            window.visualViewport?.addEventListener('resize', updateViewportHeight, { passive: true });
-            window.visualViewport?.addEventListener('scroll', updateViewportHeight, { passive: true });
+            window.addEventListener('resize', updateViewportHeight, {
+                passive: true
+            });
+            window.addEventListener('orientationchange', updateViewportHeight, {
+                passive: true
+            });
+            window.visualViewport?.addEventListener('resize', updateViewportHeight, {
+                passive: true
+            });
+            window.visualViewport?.addEventListener('scroll', updateViewportHeight, {
+                passive: true
+            });
 
             window.addEventListener('load', () => {
                 updateViewportHeight();
