@@ -1,12 +1,12 @@
 /**
  * พี่สารคาม AI - Render Production Edition
- * Enhanced & Secure Frontend Version
+ * Secure Frontend Version
  */
 
 document.addEventListener('DOMContentLoaded', () => {
 
     // =====================================================
-    // SVG Icons Reference (ใช้ SVG Vector แทน Emoji ทั้งหมด)
+    // SVG Icons Reference
     // =====================================================
     const ICONS = {
         delete: `<svg class="w-4 h-4 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>`,
@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let isGenerating = false;
 
     // =====================================================
-    // Security Escape HTML & Linkify
+    // Security Escape HTML & YouTube Embed Parser
     // =====================================================
     function escapeHTML(str) {
         if (!str) return "";
@@ -67,11 +67,43 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function linkify(text) {
         if (!text) return "";
-        const escaped = escapeHTML(text);
+
+        // 1. ตรวจจับและแปลงลิงก์ YouTube เป็นการ์ดเล่นวิดีโอ (YouTube Embed Player)
+        const youtubeRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|v\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})(?:[^\s]*)/g;
+        
+        let parsedText = text;
+        let ytMatch;
+        let videoCards = '';
+
+        while ((ytMatch = youtubeRegex.exec(text)) !== null) {
+            const videoId = ytMatch[1];
+            videoCards += `
+                <div class="my-3 overflow-hidden rounded-2xl border border-slate-200/80 bg-slate-900 shadow-md max-w-full sm:max-w-md">
+                    <div class="relative w-full aspect-video">
+                        <iframe class="absolute top-0 left-0 w-full h-full rounded-2xl" 
+                            src="https://www.youtube.com/embed/${videoId}" 
+                            title="YouTube video player" 
+                            frameborder="0" 
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                            allowfullscreen>
+                        </iframe>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 2. ลบ URL YouTube ออกจากข้อความเพื่อไม่ให้ซ้ำซ้อน
+        parsedText = parsedText.replace(youtubeRegex, '');
+
+        // 3. แปลงข้อความปกติ + ลิงก์ภายนอกอื่นๆ
+        let escaped = escapeHTML(parsedText);
         const urlRegex = /(https?:\/\/[^\s]+)/g;
-        return escaped
+        
+        escaped = escaped
             .replace(urlRegex, '<a href="$1" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 underline font-medium break-all">$1</a>')
             .replace(/\n/g, '<br>');
+
+        return escaped + videoCards;
     }
 
     function scrollToBottom() {
@@ -119,7 +151,7 @@ document.addEventListener('DOMContentLoaded', () => {
             msgContainer.innerHTML = `
                 <div class="flex flex-col items-center justify-center py-20 opacity-40">
                     ${ICONS.loader}
-                    <p class="text-xs font-medium text-gray-500 mt-3 tracking-wider">FETCHING CONVERSATION</p>
+                    <p class="text-xs font-medium text-slate-500 mt-3 tracking-wider">FETCHING CONVERSATION</p>
                 </div>
             `;
         }
@@ -232,7 +264,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // =====================================================
-    // Render Chat Bubble (โชว์รูปโปรไฟล์ผู้ใช้เหมือนเดิม)
+    // Render Chat Bubble
     // =====================================================
     function appendBubble(sender, text, id = null) {
         if (!msgContainer) return;
@@ -242,10 +274,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (id) wrapper.id = id;
 
-        // รูปโปรไฟล์ผู้ใช้ (แสดง userPic ตัวเดิม) / รูป AI
         const avatar = sender === 'user'
-            ? `<img src="${typeof userPic !== 'undefined' ? userPic : ''}" referrerpolicy="no-referrer" class="w-8 h-8 rounded-full border border-gray-100 object-cover shadow-sm" onerror="this.src='https://ui-avatars.com/api/?name=User'">`
-            : `<div class="w-8 h-8 rounded-full bg-[#f8f9fa] flex items-center justify-center border border-gray-100 shadow-sm">${ICONS.aiLogo}</div>`;
+            ? `<img src="${typeof userPic !== 'undefined' ? userPic : ''}" referrerpolicy="no-referrer" class="w-8 h-8 rounded-full border border-slate-100 object-cover shadow-sm" onerror="this.src='https://ui-avatars.com/api/?name=User'">`
+            : `<div class="w-8 h-8 rounded-full bg-[#f8f9fa] flex items-center justify-center border border-slate-100 shadow-sm">${ICONS.aiLogo}</div>`;
 
         const bubbleClass = sender === 'user'
             ? `bg-[#e8f0fe] text-[#1967d2] rounded-[20px_20px_4px_20px] px-5 py-3 border border-[#d2e3fc] max-w-[85%] break-words`
@@ -282,7 +313,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (welcome) welcome.style.display = 'none';
 
-        // แสดงข้อความของผู้ใช้ พร้อมรูปโปรไฟล์
         appendBubble('user', text);
 
         userInput.value = '';
@@ -291,10 +321,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const aiId = 'ai-' + Date.now();
 
         const typingHTML = `
-            <div class="flex gap-1.5 items-center px-4 py-3 bg-[#f8f9fa] rounded-2xl border border-gray-50 w-max">
-                <div class="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce"></div>
-                <div class="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:0.2s]"></div>
-                <div class="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:0.4s]"></div>
+            <div class="flex gap-1.5 items-center px-4 py-3 bg-[#f8f9fa] rounded-2xl border border-slate-100 w-max">
+                <div class="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce"></div>
+                <div class="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce [animation-delay:0.2s]"></div>
+                <div class="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce [animation-delay:0.4s]"></div>
             </div>
         `;
 
@@ -370,13 +400,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const div = document.createElement('div');
         div.id = `item-${chatId}`;
-        div.className = `sidebar-item group flex items-center justify-between p-3 text-sm text-gray-600 cursor-pointer rounded-xl transition-all hover:bg-gray-100`;
+        div.className = `sidebar-item group flex items-center justify-between p-3 text-sm text-slate-600 cursor-pointer rounded-xl transition-all`;
 
         div.innerHTML = `
             <span onclick="loadChat('${chatId}')" class="truncate flex-1 font-medium pr-2">
                 ${escapeHTML(message)}
             </span>
-            <button onclick="deleteChat('${chatId}', event)" class="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-red-500 transition-colors">
+            <button onclick="deleteChat('${chatId}', event)" class="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-red-500 transition-opacity rounded-lg hover:bg-red-50">
                 ${ICONS.delete}
             </button>
         `;
