@@ -6,7 +6,7 @@ ini_set('session.cookie_samesite', 'Lax');
 session_start();
 require_once 'db_config.php';
 
-// ระบบจัดการเข้าใช้งานแบบ Guest (ไม่ล็อกอิน)
+// ระบบจัดการเข้าใช้งานแบบ Guest
 if (isset($_GET['guest']) && $_GET['guest'] === 'true') {
     if (!isset($_SESSION['user_id'])) {
         $_SESSION['user_id'] = 'guest_' . uniqid();
@@ -62,9 +62,7 @@ $user_picture = (isset($_SESSION['user_picture']) && $_SESSION['user_picture'] !
             }
         }
 
-        *,
-        *::before,
-        *::after {
+        *, *::before, *::after {
             box-sizing: border-box;
         }
 
@@ -95,21 +93,15 @@ $user_picture = (isset($_SESSION['user_picture']) && $_SESSION['user_picture'] !
             opacity: 1;
         }
 
-        button,
-        textarea,
-        a {
+        button, textarea, a {
             -webkit-tap-highlight-color: transparent;
         }
 
-        button,
-        a {
+        button, a {
             touch-action: manipulation;
         }
 
-        img,
-        video,
-        canvas,
-        svg {
+        img, video, canvas, svg {
             max-width: 100%;
         }
 
@@ -126,7 +118,6 @@ $user_picture = (isset($_SESSION['user_picture']) && $_SESSION['user_picture'] !
                 opacity: 0;
                 transform: translateY(12px);
             }
-
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -186,9 +177,7 @@ $user_picture = (isset($_SESSION['user_picture']) && $_SESSION['user_picture'] !
             padding-right: var(--page-gutter);
         }
 
-        #welcome,
-        #msg-container,
-        .composer-inner {
+        #welcome, #msg-container, .composer-inner {
             width: 100%;
             max-width: 48rem;
         }
@@ -203,46 +192,19 @@ $user_picture = (isset($_SESSION['user_picture']) && $_SESSION['user_picture'] !
             font-size: clamp(1rem, 3.8vw, 1.35rem);
         }
 
-        #msg-container,
-        #msg-container * {
+        #msg-container, #msg-container * {
             min-width: 0;
         }
 
-        #msg-container p,
-        #msg-container li,
-        #msg-container div,
-        #msg-container span {
+        #msg-container p, #msg-container li, #msg-container div, #msg-container span {
             overflow-wrap: anywhere;
             word-break: break-word;
         }
 
-        #msg-container pre {
-            max-width: 100%;
-            overflow-x: auto;
-            white-space: pre;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        #msg-container code {
-            overflow-wrap: normal;
-            word-break: normal;
-        }
-
-        #msg-container table {
-            display: block;
-            width: 100%;
-            max-width: 100%;
-            overflow-x: auto;
-            border-collapse: collapse;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        #msg-container img,
-        #msg-container video,
         #msg-container iframe {
             max-width: 100%;
-            height: auto;
             border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
         }
 
         .mobile-header {
@@ -384,79 +346,6 @@ $user_picture = (isset($_SESSION['user_picture']) && $_SESSION['user_picture'] !
                 transform: translate(-50%, 5rem);
             }
         }
-
-        @media (max-width: 380px) {
-            :root {
-                --page-gutter: 0.65rem;
-            }
-
-            #sidebar {
-                width: calc(100vw - 1.5rem);
-            }
-
-            .composer-shell {
-                padding-top: 0.5rem;
-            }
-
-            #user-input {
-                padding-left: 0.75rem;
-                padding-right: 0.5rem;
-            }
-
-            #send-btn {
-                width: 40px;
-                height: 40px;
-                min-width: 40px;
-                padding: 0.5rem;
-            }
-
-            .custom-modal-box {
-                border-radius: 22px 22px 0 0;
-            }
-        }
-
-        @media (max-height: 500px) and (orientation: landscape) {
-            #welcome {
-                margin-top: 0.5rem;
-            }
-
-            #welcome h1 {
-                margin-bottom: 0.5rem;
-            }
-
-            .mobile-header {
-                padding-top: max(0.35rem, env(safe-area-inset-top));
-                padding-bottom: 0.35rem;
-            }
-
-            .composer-shell {
-                padding-top: 0.35rem;
-                padding-bottom: max(0.35rem, env(safe-area-inset-bottom));
-            }
-        }
-
-        @media (hover: none),
-        (pointer: coarse) {
-            .sidebar-item button {
-                opacity: 1 !important;
-                min-width: 36px;
-                min-height: 36px;
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-            }
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-            *,
-            *::before,
-            *::after {
-                scroll-behavior: auto !important;
-                animation-duration: 0.01ms !important;
-                animation-iteration-count: 1 !important;
-                transition-duration: 0.01ms !important;
-            }
-        }
     </style>
 </head>
 
@@ -503,7 +392,7 @@ $user_picture = (isset($_SESSION['user_picture']) && $_SESSION['user_picture'] !
     </div>
 
     <?php if (!$is_logged_in): ?>
-        <!-- หน้าเข้าสู่ระบบ (พร้อมปุ่มเข้าใช้งานแบบไม่ล็อกอิน) -->
+        <!-- หน้าเข้าสู่ระบบ (ปรับปรุงปุ่ม Guest สวยไฮเอนด์) -->
         <div class="login-screen fixed inset-0 flex flex-col items-center justify-center px-4 sm:px-6 z-[999]">
             <div class="w-full max-w-sm sm:max-w-md flex flex-col items-center text-center my-auto py-6">
                 <!-- โลโก้คณะ -->
@@ -525,10 +414,10 @@ $user_picture = (isset($_SESSION['user_picture']) && $_SESSION['user_picture'] !
                 </p>
 
                 <!-- Action Buttons Area -->
-                <div class="w-full space-y-3">
+                <div class="w-full space-y-3.5">
                     <!-- ปุ่ม Google Login -->
                     <a href="<?= $google_login_url ?>"
-                        class="w-full py-3.5 px-6 bg-white hover:bg-slate-50 border border-slate-200/90 hover:border-slate-300 rounded-full flex items-center justify-center gap-3 transition-all duration-200 shadow-sm hover:shadow-md active:scale-[0.98] text-slate-700 font-semibold text-sm sm:text-base">
+                        class="w-full py-3.5 px-6 bg-white hover:bg-slate-50/80 border border-slate-200/90 hover:border-slate-300 rounded-full flex items-center justify-center gap-3 transition-all duration-200 shadow-sm hover:shadow-md active:scale-[0.98] text-slate-700 font-semibold text-sm sm:text-base">
                         <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24">
                             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                             <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -538,11 +427,13 @@ $user_picture = (isset($_SESSION['user_picture']) && $_SESSION['user_picture'] !
                         <span>เข้าสู่ระบบด้วย Google Account</span>
                     </a>
 
-                    <!-- ปุ่มเข้าใช้งานแบบไม่ล็อกอิน (Guest Login) -->
+                    <!-- ปุ่ม Guest Login (ปรับแต่งให้สวยหรู ละมุน พรีเมียม) -->
                     <a href="index.php?guest=true"
-                        class="w-full py-3 px-6 bg-slate-100 hover:bg-slate-200/80 text-slate-600 rounded-full flex items-center justify-center gap-2 transition-all duration-200 font-semibold text-xs sm:text-sm active:scale-[0.98]">
-                        <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                        <span>เข้าใช้งานแบบไม่เข้าสู่ระบบ (Guest)</span>
+                        class="w-full py-3.5 px-6 bg-slate-900/5 hover:bg-slate-900/10 active:bg-slate-900/15 text-slate-700 border border-slate-200/60 hover:border-slate-300/80 rounded-full flex items-center justify-center gap-2.5 transition-all duration-200 font-semibold text-xs sm:text-sm backdrop-blur-sm active:scale-[0.98] group">
+                        <div class="w-6 h-6 rounded-full bg-slate-200/80 group-hover:bg-slate-300/80 flex items-center justify-center text-slate-600 transition-colors">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                        </div>
+                        <span>ทดลองใช้งานโดยไม่เข้าสู่ระบบ (Guest)</span>
                     </a>
                 </div>
 
@@ -706,18 +597,10 @@ LIMIT 20");
             };
 
             updateViewportHeight();
-            window.addEventListener('resize', updateViewportHeight, {
-                passive: true
-            });
-            window.addEventListener('orientationchange', updateViewportHeight, {
-                passive: true
-            });
-            window.visualViewport?.addEventListener('resize', updateViewportHeight, {
-                passive: true
-            });
-            window.visualViewport?.addEventListener('scroll', updateViewportHeight, {
-                passive: true
-            });
+            window.addEventListener('resize', updateViewportHeight, { passive: true });
+            window.addEventListener('orientationchange', updateViewportHeight, { passive: true });
+            window.visualViewport?.addEventListener('resize', updateViewportHeight, { passive: true });
+            window.visualViewport?.addEventListener('scroll', updateViewportHeight, { passive: true });
 
             window.addEventListener('load', () => {
                 updateViewportHeight();
