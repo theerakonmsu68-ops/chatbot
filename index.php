@@ -469,28 +469,28 @@ $user_picture = (isset($_SESSION['user_picture']) && $_SESSION['user_picture'] !
     </div>
 
     <?php if (!$is_logged_in): ?>
-        <!-- ปรับแต่งหน้าเข้าสู่ระบบใหม่ให้สวยงาม ทันสมัย ชวนใช้งาน -->
+        <!-- หน้าเข้าสู่ระบบ (ระบุคณะวิทยาการสารสนเทศ และ ลิขสิทธิ์ Theerakon Chuenchom) -->
         <div class="login-screen fixed inset-0 flex flex-col items-center justify-center px-4 sm:px-6 z-[999]">
             <div class="w-full max-w-sm sm:max-w-md flex flex-col items-center text-center my-auto py-6">
-                <!-- กรอบโลโก้ Glassmorphic -->
+                <!-- โลโก้คณะ -->
                 <div class="w-20 h-20 sm:w-24 sm:h-24 p-4 bg-white/90 border border-slate-100 rounded-[2.2rem] mb-6 flex items-center justify-center shadow-xl shadow-blue-500/10 ring-8 ring-blue-50/60 backdrop-blur-md">
-                    <img src="https://upload.wikimedia.org/wikipedia/th/b/bb/Informatics_MSU_Logo.svg" alt="MSU Logo" class="w-full h-full object-contain">
+                    <img src="https://upload.wikimedia.org/wikipedia/th/b/bb/Informatics_MSU_Logo.svg" alt="MSU Informatics Logo" class="w-full h-full object-contain">
                 </div>
 
-                <!-- ป้ายคณะ/มหาวิทยาลัย -->
+                <!-- ป้ายระบุมหาวิทยาลัย -->
                 <span class="px-3.5 py-1 bg-blue-50 text-blue-600 text-xs font-bold rounded-full mb-3 tracking-wider uppercase border border-blue-100/80 shadow-xs">
                     Mahasarakham University
                 </span>
 
-                <!-- ชื่อโปรแกรม -->
+                <!-- ชื่อระบบ และ คณะวิทยาการสารสนเทศ -->
                 <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight mb-2">
                     พี่สารคาม <span class="gemini-gradient">AI</span>
                 </h1>
                 <p class="text-slate-500 text-xs sm:text-sm mb-8 max-w-xs leading-relaxed font-normal">
-                    ระบบผู้ช่วยอัจฉริยะประมวลผลข้อมูล คณะสารสนเทศศาสตร์ มหาวิทยาลัยมหาสารคาม
+                    ระบบผู้ช่วยอัจฉริยะประมวลผลข้อมูล คณะวิทยาการสารสนเทศ มหาวิทยาลัยมหาสารคาม
                 </p>
 
-                <!-- ปุ่ม Google Login แบบ Modern -->
+                <!-- ปุ่ม Google Login -->
                 <a href="<?= $google_login_url ?>"
                     class="w-full py-3.5 px-6 bg-white hover:bg-slate-50 border border-slate-200/90 hover:border-slate-300 rounded-full flex items-center justify-center gap-3 transition-all duration-200 shadow-sm hover:shadow-md active:scale-[0.98] text-slate-700 font-semibold text-sm sm:text-base">
                     <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24">
@@ -508,9 +508,15 @@ $user_picture = (isset($_SESSION['user_picture']) && $_SESSION['user_picture'] !
                     </div>
                 <?php endif; ?>
 
-                <p class="mt-12 text-[11px] text-slate-400">
-                    &copy; <?= date('Y') ?> IT Mahasarakham University. All rights reserved.
-                </p>
+                <!-- ลิขสิทธิ์ Theerakon Chuenchom -->
+                <div class="mt-12 text-center">
+                    <p class="text-[11px] text-slate-400 leading-relaxed">
+                        &copy; <?= date('Y') ?> คณะวิทยาการสารสนเทศ มหาวิทยาลัยมหาสารคาม
+                    </p>
+                    <p class="text-[10px] text-slate-400 font-medium tracking-wide mt-0.5">
+                        Developed & Copyrighted by <span class="text-slate-600 font-semibold">Theerakon Chuenchom</span>
+                    </p>
+                </div>
             </div>
         </div>
     <?php else: ?>
