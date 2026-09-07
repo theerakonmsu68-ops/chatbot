@@ -68,42 +68,48 @@ document.addEventListener('DOMContentLoaded', () => {
     function linkify(text) {
         if (!text) return "";
 
-        // 1. ตรวจจับและแปลงลิงก์ YouTube เป็นการ์ดเล่นวิดีโอ (YouTube Embed Player)
+        // Regular Expression สำหรับดึง ID ของ YouTube
         const youtubeRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|v\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})(?:[^\s]*)/g;
         
-        let parsedText = text;
-        let ytMatch;
         let videoCards = '';
+        let match;
+        const videoIds = new Set();
 
-        while ((ytMatch = youtubeRegex.exec(text)) !== null) {
-            const videoId = ytMatch[1];
-            videoCards += `
-                <div class="my-3 overflow-hidden rounded-2xl border border-slate-200/80 bg-slate-900 shadow-md max-w-full sm:max-w-md">
-                    <div class="relative w-full aspect-video">
-                        <iframe class="absolute top-0 left-0 w-full h-full rounded-2xl" 
-                            src="https://www.youtube.com/embed/${videoId}" 
-                            title="YouTube video player" 
-                            frameborder="0" 
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                            allowfullscreen>
-                        </iframe>
+        // สะสมคลิป YouTube
+        while ((match = youtubeRegex.exec(text)) !== null) {
+            if (match[1] && !videoIds.has(match[1])) {
+                videoIds.add(match[1]);
+                const videoId = match[1];
+                videoCards += `
+                    <div class="my-3 overflow-hidden rounded-2xl border border-slate-200/80 bg-slate-900 shadow-md max-w-full sm:max-w-md">
+                        <div class="relative w-full aspect-video">
+                            <iframe class="absolute top-0 left-0 w-full h-full rounded-2xl" 
+                                src="https://www.youtube-nocookie.com/embed/${videoId}?autoplay=0&rel=0" 
+                                title="YouTube video player" 
+                                frameborder="0" 
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                                referrerpolicy="strict-origin-when-cross-origin"
+                                allowfullscreen>
+                            </iframe>
+                        </div>
                     </div>
-                </div>
-            `;
+                `;
+            }
         }
 
-        // 2. ลบ URL YouTube ออกจากข้อความเพื่อไม่ให้ซ้ำซ้อน
-        parsedText = parsedText.replace(youtubeRegex, '');
+        // ลบลิงก์ YouTube ออกจากตัวข้อความ เพื่อป้องกันการแสดงผลซ้ำซ้อน
+        const cleanText = text.replace(youtubeRegex, '').trim();
 
-        // 3. แปลงข้อความปกติ + ลิงก์ภายนอกอื่นๆ
-        let escaped = escapeHTML(parsedText);
+        // Escape HTML สำหรับข้อความปกติ
+        let htmlContent = escapeHTML(cleanText);
+
+        // แปลง URL ทั่วไปเป็น Hyperlink
         const urlRegex = /(https?:\/\/[^\s]+)/g;
-        
-        escaped = escaped
+        htmlContent = htmlContent
             .replace(urlRegex, '<a href="$1" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 underline font-medium break-all">$1</a>')
             .replace(/\n/g, '<br>');
 
-        return escaped + videoCards;
+        return htmlContent + videoCards;
     }
 
     function scrollToBottom() {
@@ -392,7 +398,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // =====================================================
-    // Update Sidebar
+    // Update Sidebar Realtime (แสดงไอคอนลบตลอดเวลา)
     // =====================================================
     function updateSidebarRealtime(chatId, message) {
         const historyList = document.getElementById('history-list');
@@ -406,7 +412,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <span onclick="loadChat('${chatId}')" class="truncate flex-1 font-medium pr-2">
                 ${escapeHTML(message)}
             </span>
-            <button onclick="deleteChat('${chatId}', event)" class="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-red-500 transition-opacity rounded-lg hover:bg-red-50">
+            <button onclick="deleteChat('${chatId}', event)" class="p-1 text-slate-400 hover:text-red-500 transition-colors rounded-lg hover:bg-red-50">
                 ${ICONS.delete}
             </button>
         `;
