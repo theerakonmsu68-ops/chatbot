@@ -6,12 +6,12 @@
 document.addEventListener('DOMContentLoaded', () => {
 
     // =====================================================
-    // SVG Icons Reference
+    // SVG Icons Reference (ใช้ SVG Vector แทน Emoji ทั้งหมด)
     // =====================================================
     const ICONS = {
         delete: `<svg class="w-4 h-4 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>`,
         loader: `<svg class="w-5 h-5 animate-spin text-blue-500" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>`,
-        aiLogo: `<svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>`
+        aiLogo: `<svg class="w-4 h-4 text-[#1a73e8]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>`
     };
 
     // =====================================================
@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let isGenerating = false;
 
     // =====================================================
-    // Security & Parsing Utilities
+    // Security Escape HTML & Linkify
     // =====================================================
     function escapeHTML(str) {
         if (!str) return "";
@@ -89,7 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // =====================================================
     window.newChat = function () {
         if (isGenerating) return;
-        
+
         currentChatId = null;
 
         if (msgContainer) msgContainer.innerHTML = '';
@@ -117,9 +117,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (msgContainer) {
             msgContainer.innerHTML = `
-                <div class="flex flex-col items-center justify-center py-20 opacity-60">
+                <div class="flex flex-col items-center justify-center py-20 opacity-40">
                     ${ICONS.loader}
-                    <p class="text-xs font-medium text-gray-500 mt-3 tracking-wider">กำลังโหลดการสนทนา...</p>
+                    <p class="text-xs font-medium text-gray-500 mt-3 tracking-wider">FETCHING CONVERSATION</p>
                 </div>
             `;
         }
@@ -149,16 +149,14 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error("Load History Error:", error);
             if (msgContainer) {
                 msgContainer.innerHTML = `
-                    <div class="p-4 my-4 bg-red-50 rounded-xl text-center">
-                        <p class="text-red-500 text-sm font-medium">ไม่สามารถโหลดประวัติการสนทนาได้</p>
-                    </div>
+                    <p class="text-center text-red-400 py-10 text-sm">ไม่สามารถโหลดประวัติการสนทนาได้</p>
                 `;
             }
         }
     };
 
     // =====================================================
-    // Delete Modal & Operations
+    // Delete Modal
     // =====================================================
     const deleteModal = document.getElementById('gemini-delete-modal');
     const modalCancelBtn = document.getElementById('modal-cancel-btn');
@@ -186,6 +184,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.target === deleteModal) closeDeleteModal();
     });
 
+    // =====================================================
+    // Confirm Delete
+    // =====================================================
     modalConfirmBtn?.addEventListener('click', async () => {
         if (!pendingDeleteChatId) return;
 
@@ -222,39 +223,44 @@ document.addEventListener('DOMContentLoaded', () => {
                     }, 2500);
                 }
             } else {
-                alert('ไม่สามารถลบห้องสนทนาได้');
+                alert('ไม่สามารถลบข้อมูลห้องสนทนาได้');
             }
         } catch (error) {
             console.error("Delete Error:", error);
-            alert('เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์');
+            alert('ไม่สามารถเชื่อมต่อ Server ได้');
         }
     });
 
     // =====================================================
-    // Render Chat Bubble
+    // Render Chat Bubble (โชว์รูปโปรไฟล์ผู้ใช้เหมือนเดิม)
     // =====================================================
     function appendBubble(sender, text, id = null) {
         if (!msgContainer) return;
 
         const wrapper = document.createElement('div');
-        wrapper.className = `flex w-full ${sender === 'user' ? 'justify-end' : 'justify-start'} mb-6 msg-animate`;
+        wrapper.className = `flex w-full ${sender === 'user' ? 'justify-end' : 'justify-start'} mb-8 msg-animate`;
 
         if (id) wrapper.id = id;
 
+        // รูปโปรไฟล์ผู้ใช้ (แสดง userPic ตัวเดิม) / รูป AI
         const avatar = sender === 'user'
-            ? `<img src="${window.userPic || ''}" referrerpolicy="no-referrer" class="w-8 h-8 rounded-full border border-gray-200 object-cover shadow-sm" onerror="this.src='https://ui-avatars.com/api/?name=User&background=0D8ABC&color=fff'">`
-            : `<div class="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center border border-blue-100 text-blue-600 font-bold shadow-sm">${ICONS.aiLogo}</div>`;
+            ? `<img src="${typeof userPic !== 'undefined' ? userPic : ''}" referrerpolicy="no-referrer" class="w-8 h-8 rounded-full border border-gray-100 object-cover shadow-sm" onerror="this.src='https://ui-avatars.com/api/?name=User'">`
+            : `<div class="w-8 h-8 rounded-full bg-[#f8f9fa] flex items-center justify-center border border-gray-100 shadow-sm">${ICONS.aiLogo}</div>`;
 
         const bubbleClass = sender === 'user'
-            ? `bg-blue-600 text-white rounded-[20px_20px_4px_20px] px-5 py-3 shadow-sm max-w-[85%] break-words`
-            : `text-gray-800 pt-1 content-area w-full leading-relaxed text-[16px] max-w-[85%] break-words`;
+            ? `bg-[#e8f0fe] text-[#1967d2] rounded-[20px_20px_4px_20px] px-5 py-3 border border-[#d2e3fc] max-w-[85%] break-words`
+            : `text-[#3c4043] pt-1 content-area w-full leading-relaxed text-[16px] max-w-[85%] break-words`;
 
         const parsedContent = sender === 'user' ? escapeHTML(text).replace(/\n/g, '<br>') : linkify(text);
 
         wrapper.innerHTML = `
-            <div class="flex ${sender === 'user' ? 'flex-row-reverse' : 'flex-row'} gap-3 items-start w-full">
-                <div class="shrink-0 mt-1">${avatar}</div>
-                <div class="${bubbleClass}">${parsedContent}</div>
+            <div class="flex ${sender === 'user' ? 'flex-row-reverse' : 'flex-row'} gap-3 items-start">
+                <div class="shrink-0 mt-1">
+                    ${avatar}
+                </div>
+                <div class="${bubbleClass}">
+                    ${parsedContent}
+                </div>
             </div>
         `;
 
@@ -263,7 +269,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // =====================================================
-    // Send Message Logic
+    // SEND MESSAGE
     // =====================================================
     async function send() {
         if (!userInput || isGenerating) return;
@@ -276,6 +282,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (welcome) welcome.style.display = 'none';
 
+        // แสดงข้อความของผู้ใช้ พร้อมรูปโปรไฟล์
         appendBubble('user', text);
 
         userInput.value = '';
@@ -284,10 +291,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const aiId = 'ai-' + Date.now();
 
         const typingHTML = `
-            <div class="flex gap-1.5 items-center px-4 py-3 bg-gray-100 rounded-2xl border border-gray-200/50 w-max">
-                <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:0.2s]"></div>
-                <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:0.4s]"></div>
+            <div class="flex gap-1.5 items-center px-4 py-3 bg-[#f8f9fa] rounded-2xl border border-gray-50 w-max">
+                <div class="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce"></div>
+                <div class="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:0.2s]"></div>
+                <div class="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:0.4s]"></div>
             </div>
         `;
 
@@ -328,7 +335,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const contentArea = aiBubble.querySelector('.content-area');
                 if (contentArea) {
                     contentArea.innerHTML = `
-                        <div class="opacity-0 transition-opacity duration-300" id="fade-${aiId}">
+                        <div class="opacity-0 transition-opacity duration-500" id="fade-${aiId}">
                             ${linkify(data.reply || '')}
                         </div>
                     `;
@@ -344,7 +351,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (aiBubble) {
                 const area = aiBubble.querySelector('.content-area');
                 if (area) {
-                    area.innerHTML = `<span class="text-red-500 font-medium">ขออภัยครับ ระบบเกิดข้อผิดพลาดในการเชื่อมต่อ</span>`;
+                    area.innerHTML = `<span class="text-red-500">ขออภัยครับ ระบบเชื่อมต่อไม่ได้</span>`;
                 }
             }
         } finally {
@@ -363,13 +370,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const div = document.createElement('div');
         div.id = `item-${chatId}`;
-        div.className = `sidebar-item group flex items-center justify-between p-3 text-sm text-gray-700 cursor-pointer rounded-xl transition-all hover:bg-gray-100/80 mb-1`;
+        div.className = `sidebar-item group flex items-center justify-between p-3 text-sm text-gray-600 cursor-pointer rounded-xl transition-all hover:bg-gray-100`;
 
         div.innerHTML = `
             <span onclick="loadChat('${chatId}')" class="truncate flex-1 font-medium pr-2">
                 ${escapeHTML(message)}
             </span>
-            <button onclick="deleteChat('${chatId}', event)" class="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-red-500 transition-all rounded-md hover:bg-red-50" title="ลบการสนทนา">
+            <button onclick="deleteChat('${chatId}', event)" class="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-red-500 transition-colors">
                 ${ICONS.delete}
             </button>
         `;
@@ -378,7 +385,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // =====================================================
-    // Event Listeners
+    // Events Listeners
     // =====================================================
     if (sendBtn) sendBtn.onclick = send;
 
@@ -392,7 +399,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         userInput.oninput = function () {
             this.style.height = 'auto';
-            this.style.height = Math.min(this.scrollHeight, 150) + 'px';
+            this.style.height = this.scrollHeight + 'px';
         };
 
         userInput.focus();
