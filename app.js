@@ -6,7 +6,7 @@
 document.addEventListener('DOMContentLoaded', () => {
 
     // =====================================================
-    // SVG Icons Reference
+    // SVG Icons Reference (ใช้ SVG Vector แทน Emoji ทั้งหมด)
     // =====================================================
     const ICONS = {
         delete: `<svg class="w-4 h-4 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>`,
@@ -75,13 +75,13 @@ document.addEventListener('DOMContentLoaded', () => {
         let match;
         const videoIds = new Set();
 
-        // สะสมคลิป YouTube
+        // สะสมคลิป YouTube (ล็อกความกว้างบาลานซ์ที่ 280px - 320px พอดีกับ UI)
         while ((match = youtubeRegex.exec(text)) !== null) {
             if (match[1] && !videoIds.has(match[1])) {
                 videoIds.add(match[1]);
                 const videoId = match[1];
                 videoCards += `
-                    <div class="my-3 overflow-hidden rounded-2xl border border-slate-200/80 bg-slate-900 shadow-md max-w-full sm:max-w-md">
+                    <div class="my-2.5 overflow-hidden rounded-2xl border border-slate-200/80 bg-slate-900 shadow-sm w-full max-w-[280px] sm:max-w-[320px]">
                         <div class="relative w-full aspect-video">
                             <iframe class="absolute top-0 left-0 w-full h-full rounded-2xl" 
                                 src="https://www.youtube-nocookie.com/embed/${videoId}?autoplay=0&rel=0" 
@@ -97,7 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // ลบลิงก์ YouTube ออกจากตัวข้อความ เพื่อป้องกันการแสดงผลซ้ำซ้อน
+        // ลบลิงก์ YouTube ออกจากตัวข้อความ เพื่อไม่ให้ข้อความยาวหรือซ้ำซ้อน
         const cleanText = text.replace(youtubeRegex, '').trim();
 
         // Escape HTML สำหรับข้อความปกติ
@@ -109,7 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
             .replace(urlRegex, '<a href="$1" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 underline font-medium break-all">$1</a>')
             .replace(/\n/g, '<br>');
 
-        return htmlContent + videoCards;
+        return (htmlContent ? `<div>${htmlContent}</div>` : '') + videoCards;
     }
 
     function scrollToBottom() {
@@ -398,7 +398,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // =====================================================
-    // Update Sidebar Realtime (แสดงไอคอนลบตลอดเวลา)
+    // Update Sidebar Realtime (แสดงปุ่มลบตลอดเวลา)
     // =====================================================
     function updateSidebarRealtime(chatId, message) {
         const historyList = document.getElementById('history-list');
