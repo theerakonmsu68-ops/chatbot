@@ -6,6 +6,18 @@ ini_set('session.cookie_samesite', 'Lax');
 session_start();
 require_once 'db_config.php';
 
+// ระบบจัดการเข้าใช้งานแบบ Guest (ไม่ล็อกอิน)
+if (isset($_GET['guest']) && $_GET['guest'] === 'true') {
+    if (!isset($_SESSION['user_id'])) {
+        $_SESSION['user_id'] = 'guest_' . uniqid();
+        $_SESSION['user_name'] = 'ผู้ใช้งานทั่วไป (Guest)';
+        $_SESSION['user_picture'] = 'https://ui-avatars.com/api/?name=Guest&background=e2e8f0&color=64748b';
+        $_SESSION['is_guest'] = true;
+    }
+    header('Location: index.php');
+    exit;
+}
+
 // Google Login Config
 $client_id = getenv("GOOGLE_CLIENT_ID");
 $redirect_uri = getenv("GOOGLE_REDIRECT_URI");
@@ -303,7 +315,6 @@ $user_picture = (isset($_SESSION['user_picture']) && $_SESSION['user_picture'] !
             overflow-wrap: anywhere;
         }
 
-        /* Style ปรับแต่งพิเศษสำหรับหน้า Login ให้สวยหรู */
         .login-screen {
             min-height: var(--app-height);
             padding-top: max(1.5rem, env(safe-area-inset-top));
@@ -451,7 +462,7 @@ $user_picture = (isset($_SESSION['user_picture']) && $_SESSION['user_picture'] !
 
 <body class="flex w-full overflow-hidden bg-white">
 
-    <!-- Modal ยืนยันการลบการสนทนา (สวยงามคงเดิม) -->
+    <!-- Modal ยืนยันการลบการสนทนา -->
     <div id="gemini-delete-modal" class="custom-modal-backdrop">
         <div class="custom-modal-box">
             <h3 class="text-xl font-medium text-[#1f1f1f] mb-3 tracking-tight">ลบการสนทนานี้ใช่หรือไม่?</h3>
@@ -467,7 +478,7 @@ $user_picture = (isset($_SESSION['user_picture']) && $_SESSION['user_picture'] !
         </div>
     </div>
 
-    <!-- Modal ยืนยันการออกจากระบบ (Logout Confirmation Modal) -->
+    <!-- Modal ยืนยันการออกจากระบบ -->
     <div id="logout-confirm-modal" class="custom-modal-backdrop">
         <div class="custom-modal-box text-center">
             <div class="w-12 h-12 rounded-full bg-rose-50 text-rose-500 flex items-center justify-center mx-auto mb-3.5 border border-rose-100">
@@ -492,7 +503,7 @@ $user_picture = (isset($_SESSION['user_picture']) && $_SESSION['user_picture'] !
     </div>
 
     <?php if (!$is_logged_in): ?>
-        <!-- หน้าเข้าสู่ระบบ (ระบุคณะวิทยาการสารสนเทศ และ ลิขสิทธิ์ Theerakon Chuenchom) -->
+        <!-- หน้าเข้าสู่ระบบ (พร้อมปุ่มเข้าใช้งานแบบไม่ล็อกอิน) -->
         <div class="login-screen fixed inset-0 flex flex-col items-center justify-center px-4 sm:px-6 z-[999]">
             <div class="w-full max-w-sm sm:max-w-md flex flex-col items-center text-center my-auto py-6">
                 <!-- โลโก้คณะ -->
@@ -513,17 +524,27 @@ $user_picture = (isset($_SESSION['user_picture']) && $_SESSION['user_picture'] !
                     ระบบผู้ช่วยอัจฉริยะประมวลผลข้อมูล คณะวิทยาการสารสนเทศ มหาวิทยาลัยมหาสารคาม
                 </p>
 
-                <!-- ปุ่ม Google Login -->
-                <a href="<?= $google_login_url ?>"
-                    class="w-full py-3.5 px-6 bg-white hover:bg-slate-50 border border-slate-200/90 hover:border-slate-300 rounded-full flex items-center justify-center gap-3 transition-all duration-200 shadow-sm hover:shadow-md active:scale-[0.98] text-slate-700 font-semibold text-sm sm:text-base">
-                    <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24">
-                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-                    </svg>
-                    <span>เข้าสู่ระบบด้วย Google Account</span>
-                </a>
+                <!-- Action Buttons Area -->
+                <div class="w-full space-y-3">
+                    <!-- ปุ่ม Google Login -->
+                    <a href="<?= $google_login_url ?>"
+                        class="w-full py-3.5 px-6 bg-white hover:bg-slate-50 border border-slate-200/90 hover:border-slate-300 rounded-full flex items-center justify-center gap-3 transition-all duration-200 shadow-sm hover:shadow-md active:scale-[0.98] text-slate-700 font-semibold text-sm sm:text-base">
+                        <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24">
+                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                        </svg>
+                        <span>เข้าสู่ระบบด้วย Google Account</span>
+                    </a>
+
+                    <!-- ปุ่มเข้าใช้งานแบบไม่ล็อกอิน (Guest Login) -->
+                    <a href="index.php?guest=true"
+                        class="w-full py-3 px-6 bg-slate-100 hover:bg-slate-200/80 text-slate-600 rounded-full flex items-center justify-center gap-2 transition-all duration-200 font-semibold text-xs sm:text-sm active:scale-[0.98]">
+                        <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                        <span>เข้าใช้งานแบบไม่เข้าสู่ระบบ (Guest)</span>
+                    </a>
+                </div>
 
                 <?php if (isset($_GET['error'])): ?>
                     <div class="mt-4 p-3.5 bg-red-50 text-red-600 rounded-2xl text-xs border border-red-100 max-w-xs text-center font-medium">
@@ -545,7 +566,6 @@ $user_picture = (isset($_SESSION['user_picture']) && $_SESSION['user_picture'] !
     <?php else: ?>
         <div id="overlay" class="fixed inset-0 bg-slate-900/20 z-[55] hidden backdrop-blur-xs transition-opacity duration-300"></div>
 
-        <!-- Sidebar ด้านข้างปรับแต่งให้มนละมุน -->
         <aside id="sidebar"
             class="w-72 bg-slate-50/90 backdrop-blur-md border-r border-slate-200/80 fixed inset-y-0 left-0 z-[60] transform -translate-x-full md:relative md:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col p-4">
             <div class="flex items-center justify-between mb-5 md:hidden">
@@ -603,7 +623,7 @@ LIMIT 20");
                 </div>
             </div>
 
-            <!-- Profile Card และปุ่มออกจากระบบแบบ Alert -->
+            <!-- Profile Card -->
             <div class="mt-auto pt-4 border-t border-slate-200/80 flex items-center gap-3">
                 <img src="<?= htmlspecialchars($user_picture, ENT_QUOTES, 'UTF-8') ?>" referrerpolicy="no-referrer"
                     class="w-10 h-10 rounded-full border border-slate-200 shadow-sm object-cover"
@@ -642,7 +662,6 @@ LIMIT 20");
                 <div id="msg-container" class="mx-auto space-y-6 sm:space-y-8 pb-4 sm:pb-8"></div>
             </div>
 
-            <!-- Composer Shell (ส่วนช่องพิมพ์ละมุนตา สไตล์ Floating) -->
             <div class="composer-shell bg-gradient-to-t from-white via-white to-transparent pt-2">
                 <div class="composer-inner mx-auto relative">
                     <div class="flex min-w-0 items-end gap-1.5 sm:gap-2 p-2 bg-slate-100/80 hover:bg-slate-100 focus-within:bg-white border border-slate-200/70 focus-within:border-blue-400 rounded-[28px] focus-within:ring-4 focus-within:ring-blue-500/10 transition-all duration-300 shadow-sm">
@@ -662,7 +681,6 @@ LIMIT 20");
         <script>
             const userPic = <?= json_encode($user_picture, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
 
-            // ฟังก์ชันควบคุม Logout Confirmation Modal
             const logoutModal = document.getElementById('logout-confirm-modal');
             
             function openLogoutModal() {
