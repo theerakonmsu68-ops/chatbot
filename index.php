@@ -34,7 +34,7 @@ $user_picture = (isset($_SESSION['user_picture']) && $_SESSION['user_picture'] !
 
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link href="https://upload.wikimedia.org/wikipedia/th/b/bb/Informatics_MSU_Logo.svg" rel="icon">
 
     <style>
@@ -69,9 +69,9 @@ $user_picture = (isset($_SESSION['user_picture']) && $_SESSION['user_picture'] !
             height: var(--app-height);
             min-height: var(--app-height);
             margin: 0;
-            font-family: 'Inter', 'Sarabun', sans-serif;
-            background: #fff;
-            color: #1f1f1f;
+            font-family: 'Plus Jakarta Sans', 'Sarabun', sans-serif;
+            background: #ffffff;
+            color: #0f172a;
             opacity: 1;
             overflow: hidden;
             transition: opacity 0.4s ease-in-out;
@@ -102,7 +102,7 @@ $user_picture = (isset($_SESSION['user_picture']) && $_SESSION['user_picture'] !
         }
 
         .gemini-gradient {
-            background: linear-gradient(70deg, #4285f4, #9b72cb, #d96570);
+            background: linear-gradient(135deg, #2563eb 0%, #9333ea 50%, #db2777 100%);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -127,17 +127,18 @@ $user_picture = (isset($_SESSION['user_picture']) && $_SESSION['user_picture'] !
 
         .sidebar-item {
             min-width: 0;
-            transition: background-color 0.2s ease, transform 0.2s ease;
-            border-radius: 12px;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 14px;
         }
 
         .sidebar-item:hover {
-            background: #f0f4f9;
+            background: rgba(241, 245, 249, 0.9);
+            transform: translateX(2px);
         }
 
         .custom-scrollbar {
             scrollbar-width: thin;
-            scrollbar-color: #d8dee8 transparent;
+            scrollbar-color: #cbd5e1 transparent;
             overscroll-behavior: contain;
         }
 
@@ -147,7 +148,7 @@ $user_picture = (isset($_SESSION['user_picture']) && $_SESSION['user_picture'] !
         }
 
         .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #d8dee8;
+            background: #cbd5e1;
             border-radius: 10px;
         }
 
@@ -181,13 +182,13 @@ $user_picture = (isset($_SESSION['user_picture']) && $_SESSION['user_picture'] !
         }
 
         #welcome h1 {
-            font-size: clamp(1.75rem, 7vw, 3rem);
-            line-height: 1.12;
+            font-size: clamp(1.85rem, 6.5vw, 3rem);
+            line-height: 1.15;
             overflow-wrap: anywhere;
         }
 
         #welcome p {
-            font-size: clamp(1rem, 4.2vw, 1.5rem);
+            font-size: clamp(1rem, 3.8vw, 1.35rem);
         }
 
         #msg-container,
@@ -229,7 +230,7 @@ $user_picture = (isset($_SESSION['user_picture']) && $_SESSION['user_picture'] !
         #msg-container iframe {
             max-width: 100%;
             height: auto;
-            border-radius: 12px;
+            border-radius: 16px;
         }
 
         .mobile-header {
@@ -238,7 +239,7 @@ $user_picture = (isset($_SESSION['user_picture']) && $_SESSION['user_picture'] !
 
         .composer-shell {
             flex: 0 0 auto;
-            padding: 0.75rem var(--page-gutter) max(0.75rem, env(safe-area-inset-bottom));
+            padding: 0.75rem var(--page-gutter) max(0.85rem, env(safe-area-inset-bottom));
         }
 
         #user-input {
@@ -250,15 +251,15 @@ $user_picture = (isset($_SESSION['user_picture']) && $_SESSION['user_picture'] !
         }
 
         #send-btn {
-            width: 48px;
-            height: 48px;
-            min-width: 48px;
+            width: 44px;
+            height: 44px;
+            min-width: 44px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
         }
 
-        /* Modal */
+        /* Modal Base Structure */
         .custom-modal-backdrop {
             position: fixed;
             inset: 0;
@@ -267,10 +268,11 @@ $user_picture = (isset($_SESSION['user_picture']) && $_SESSION['user_picture'] !
             align-items: center;
             justify-content: center;
             padding: max(1rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right)) max(1rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
-            background-color: rgba(0, 0, 0, 0.4);
+            background-color: rgba(15, 23, 42, 0.35);
+            backdrop-filter: blur(6px);
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.25s cubic-bezier(0.2, 0, 0, 1);
+            transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .custom-modal-backdrop.active {
@@ -283,11 +285,11 @@ $user_picture = (isset($_SESSION['user_picture']) && $_SESSION['user_picture'] !
             max-height: calc(var(--app-height) - 2rem);
             overflow-y: auto;
             padding: 24px;
-            background: #fff;
+            background: #ffffff;
             border-radius: 28px;
-            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
-            transform: scale(0.9) translateY(10px);
-            transition: transform 0.25s cubic-bezier(0.2, 0, 0, 1);
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.12);
+            transform: scale(0.92) translateY(10px);
+            transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .custom-modal-backdrop.active .custom-modal-box {
@@ -307,7 +309,7 @@ $user_picture = (isset($_SESSION['user_picture']) && $_SESSION['user_picture'] !
             padding-top: max(1.5rem, env(safe-area-inset-top));
             padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
             overflow-y: auto;
-            background: radial-gradient(circle at 50% 0%, rgba(66, 133, 244, 0.12) 0%, rgba(155, 114, 203, 0.05) 50%, #ffffff 100%);
+            background: radial-gradient(circle at 50% 0%, rgba(37, 99, 235, 0.1) 0%, rgba(147, 51, 234, 0.04) 50%, #ffffff 100%);
         }
 
         @media (min-width: 768px) {
@@ -323,7 +325,7 @@ $user_picture = (isset($_SESSION['user_picture']) && $_SESSION['user_picture'] !
 
             .composer-shell {
                 padding-top: 0.5rem;
-                padding-bottom: max(2rem, env(safe-area-inset-bottom));
+                padding-bottom: max(1.75rem, env(safe-area-inset-bottom));
             }
         }
 
@@ -391,10 +393,10 @@ $user_picture = (isset($_SESSION['user_picture']) && $_SESSION['user_picture'] !
             }
 
             #send-btn {
-                width: 44px;
-                height: 44px;
-                min-width: 44px;
-                padding: 0.75rem;
+                width: 40px;
+                height: 40px;
+                min-width: 40px;
+                padding: 0.5rem;
             }
 
             .custom-modal-box {
@@ -449,6 +451,7 @@ $user_picture = (isset($_SESSION['user_picture']) && $_SESSION['user_picture'] !
 
 <body class="flex w-full overflow-hidden bg-white">
 
+    <!-- Modal ยืนยันการลบการสนทนา (สวยงามคงเดิม) -->
     <div id="gemini-delete-modal" class="custom-modal-backdrop">
         <div class="custom-modal-box">
             <h3 class="text-xl font-medium text-[#1f1f1f] mb-3 tracking-tight">ลบการสนทนานี้ใช่หรือไม่?</h3>
@@ -464,7 +467,27 @@ $user_picture = (isset($_SESSION['user_picture']) && $_SESSION['user_picture'] !
         </div>
     </div>
 
-    <div id="gemini-toast" class="fixed bottom-4 right-4 z-[110] bg-gray-900 text-white text-xs px-5 py-3 rounded-xl shadow-xl translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+    <!-- Modal ยืนยันการออกจากระบบ (Logout Confirmation Modal) -->
+    <div id="logout-confirm-modal" class="custom-modal-backdrop">
+        <div class="custom-modal-box text-center">
+            <div class="w-12 h-12 rounded-full bg-rose-50 text-rose-500 flex items-center justify-center mx-auto mb-3.5 border border-rose-100">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+            </div>
+            <h3 class="text-lg font-bold text-slate-800 mb-1 tracking-tight">ออกจากระบบ</h3>
+            <p class="text-sm text-slate-500 leading-relaxed mb-6 font-normal">คุณยืนยันที่จะออกจากระบบหรือไม่?</p>
+            <div class="flex items-center justify-center gap-2.5">
+                <button type="button" onclick="closeLogoutModal()" class="flex-1 py-2.5 px-4 text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-full transition-colors">
+                    ยกเลิก
+                </button>
+                <a href="logout.php" class="flex-1 py-2.5 px-4 text-sm font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-full shadow-sm shadow-rose-200 transition-colors block text-center">
+                    ยืนยัน
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="gemini-toast" class="fixed bottom-4 right-4 z-[110] bg-slate-900 text-white text-xs px-5 py-3 rounded-2xl shadow-xl translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
         ลบการสนทนาเรียบร้อยแล้ว
     </div>
 
@@ -520,13 +543,14 @@ $user_picture = (isset($_SESSION['user_picture']) && $_SESSION['user_picture'] !
             </div>
         </div>
     <?php else: ?>
-        <div id="overlay" class="fixed inset-0 bg-black/20 z-[55] hidden backdrop-blur-sm transition-opacity duration-300"></div>
+        <div id="overlay" class="fixed inset-0 bg-slate-900/20 z-[55] hidden backdrop-blur-xs transition-opacity duration-300"></div>
 
+        <!-- Sidebar ด้านข้างปรับแต่งให้มนละมุน -->
         <aside id="sidebar"
-            class="w-72 bg-[#f8fafc] border-r border-gray-200 fixed inset-y-0 left-0 z-[60] transform -translate-x-full md:relative md:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col p-4">
+            class="w-72 bg-slate-50/90 backdrop-blur-md border-r border-slate-200/80 fixed inset-y-0 left-0 z-[60] transform -translate-x-full md:relative md:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col p-4">
             <div class="flex items-center justify-between mb-5 md:hidden">
                 <span class="font-bold gemini-gradient text-lg">เมนูระบบ</span>
-                <button type="button" id="close-sidebar" aria-label="ปิดเมนู" class="p-2 text-gray-500 hover:bg-gray-200 rounded-full transition-colors">
+                <button type="button" id="close-sidebar" aria-label="ปิดเมนู" class="p-2 text-slate-500 hover:bg-slate-200/60 rounded-full transition-colors">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <line x1="18" y1="6" x2="6" y2="18"></line>
                         <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -535,16 +559,16 @@ $user_picture = (isset($_SESSION['user_picture']) && $_SESSION['user_picture'] !
             </div>
 
             <button type="button" onclick="newChat()"
-                class="w-full py-3 mb-4 bg-white border border-gray-200 rounded-2xl text-sm font-medium shadow-sm hover:shadow-md hover:border-gray-300 transition-all flex items-center justify-center gap-2 active:scale-95 text-gray-700">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                class="w-full py-3 mb-4 bg-white hover:bg-slate-50 border border-slate-200/80 rounded-2xl text-sm font-semibold text-slate-700 shadow-sm transition-all flex items-center justify-center gap-2 active:scale-95">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-blue-600">
                     <line x1="12" y1="5" x2="12" y2="19"></line>
                     <line x1="5" y1="12" x2="19" y2="12"></line>
                 </svg>
-                การสนทนาใหม่
+                <span>การสนทนาใหม่</span>
             </button>
 
             <div class="flex-1 overflow-y-auto space-y-1 custom-scrollbar pr-1">
-                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-2 mb-2">ประวัติการสนทนาล่าสุด</p>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-2 mb-2">ประวัติการสนทนาล่าสุด</p>
                 <div id="history-list" class="space-y-1">
                     <?php
                     $stmt = $conn->prepare("SELECT 
@@ -561,12 +585,12 @@ LIMIT 20");
                     $res = $stmt->get_result();
                     while ($row = $res->fetch_assoc()): ?>
                         <div id="item-<?= $row['chat_id'] ?>"
-                            class="sidebar-item group flex items-center justify-between p-3 text-sm text-gray-600 cursor-pointer rounded-xl transition-all hover:bg-gray-100">
+                            class="sidebar-item group flex items-center justify-between p-3 text-sm text-slate-600 cursor-pointer rounded-xl transition-all">
                             <span onclick="loadChat('<?= $row['chat_id'] ?>')" class="truncate flex-1 font-medium pr-2">
                                 <?= htmlspecialchars($row['message']) ?>
                             </span>
                             <button type="button" aria-label="ลบการสนทนา" onclick="deleteChat('<?= $row['chat_id'] ?>')"
-                                class="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-red-500 transition-opacity">
+                                class="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-red-500 transition-opacity rounded-lg hover:bg-red-50">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <polyline points="3 6 5 6 21 6"></polyline>
                                     <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
@@ -579,49 +603,53 @@ LIMIT 20");
                 </div>
             </div>
 
-            <div class="mt-auto pt-4 border-t border-gray-200 flex items-center gap-3">
+            <!-- Profile Card และปุ่มออกจากระบบแบบ Alert -->
+            <div class="mt-auto pt-4 border-t border-slate-200/80 flex items-center gap-3">
                 <img src="<?= htmlspecialchars($user_picture, ENT_QUOTES, 'UTF-8') ?>" referrerpolicy="no-referrer"
-                    class="w-10 h-10 rounded-full border border-gray-200 shadow-sm object-cover"
+                    class="w-10 h-10 rounded-full border border-slate-200 shadow-sm object-cover"
                     onerror="this.src='https://ui-avatars.com/api/?name=User'">
                 <div class="flex-1 min-w-0">
-                    <p class="text-xs font-semibold truncate text-gray-700"><?= htmlspecialchars($user_name, ENT_QUOTES, 'UTF-8') ?></p>
-                    <a href="logout.php" class="text-[10px] text-red-500 font-medium hover:underline">ออกจากระบบ</a>
+                    <p class="text-xs font-bold truncate text-slate-800"><?= htmlspecialchars($user_name, ENT_QUOTES, 'UTF-8') ?></p>
+                    <button type="button" onclick="openLogoutModal()" class="text-[11px] text-rose-500 font-medium hover:underline p-0 border-none bg-transparent cursor-pointer">
+                        ออกจากระบบ
+                    </button>
                 </div>
             </div>
         </aside>
 
         <main class="flex-1 w-full flex flex-col relative bg-white min-w-0 min-h-0 overflow-hidden">
-            <header class="mobile-header md:hidden flex-none flex items-center justify-between px-3 py-2.5 border-b bg-white">
-                <button type="button" id="open-sidebar" aria-label="เปิดเมนู" class="p-2 text-gray-600 hover:bg-gray-100 rounded-full transition-colors">
+            <header class="mobile-header md:hidden flex-none flex items-center justify-between px-3.5 py-2.5 border-b border-slate-100 bg-white/90 backdrop-blur-md">
+                <button type="button" id="open-sidebar" aria-label="เปิดเมนู" class="p-2 text-slate-600 hover:bg-slate-100 rounded-full transition-colors">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <line x1="3" y1="12" x2="21" y2="12"></line>
                         <line x1="3" y1="6" x2="21" y2="6"></line>
                         <line x1="3" y1="18" x2="21" y2="18"></line>
                     </svg>
                 </button>
-                <span class="font-bold gemini-gradient text-lg">Chatbot IT</span>
+                <span class="font-bold gemini-gradient text-lg tracking-tight">Chatbot IT</span>
                 <div class="w-10"></div>
             </header>
 
             <div id="chat-box" class="flex-1 min-h-0 chat-container custom-scrollbar">
                 <div id="welcome" class="mx-auto mt-12 md:mt-20 px-1 sm:px-2">
-                    <h1 class="text-4xl md:text-5xl font-medium mb-4 tracking-tight">
-                        <span class="gemini-gradient font-bold">สวัสดีครับคุณ <?= htmlspecialchars(explode(' ', trim($user_name))[0] ?? 'User', ENT_QUOTES, 'UTF-8') ?></span>
+                    <h1 class="text-3xl md:text-5xl font-extrabold mb-3 tracking-tight">
+                        <span class="gemini-gradient">สวัสดีครับคุณ <?= htmlspecialchars(explode(' ', trim($user_name))[0] ?? 'User', ENT_QUOTES, 'UTF-8') ?></span>
                     </h1>
-                    <p class="text-xl md:text-2xl text-gray-300 font-light leading-relaxed">
+                    <p class="text-lg md:text-2xl text-slate-400 font-light leading-relaxed">
                         มีเรื่องอะไรให้พี่สารคามช่วยดูแลหรือแนะนำในวันนี้ไหมครับ?
                     </p>
                 </div>
                 <div id="msg-container" class="mx-auto space-y-6 sm:space-y-8 pb-4 sm:pb-8"></div>
             </div>
 
-            <div class="composer-shell bg-white border-t md:border-t-0 border-gray-100">
+            <!-- Composer Shell (ส่วนช่องพิมพ์ละมุนตา สไตล์ Floating) -->
+            <div class="composer-shell bg-gradient-to-t from-white via-white to-transparent pt-2">
                 <div class="composer-inner mx-auto relative">
-                    <div class="flex min-w-0 items-end gap-1.5 sm:gap-2 p-1.5 bg-[#f0f4f9] rounded-[28px] focus-within:bg-white focus-within:ring-1 focus-within:ring-gray-200 focus-within:shadow-lg transition-all duration-300">
+                    <div class="flex min-w-0 items-end gap-1.5 sm:gap-2 p-2 bg-slate-100/80 hover:bg-slate-100 focus-within:bg-white border border-slate-200/70 focus-within:border-blue-400 rounded-[28px] focus-within:ring-4 focus-within:ring-blue-500/10 transition-all duration-300 shadow-sm">
                         <textarea id="user-input" rows="1" placeholder="ถามพี่สารคามได้เลย..."
-                            class="flex-1 min-w-0 bg-transparent border-none outline-none py-3 px-3 sm:px-4 resize-none max-h-36 text-gray-700 custom-scrollbar" style="height: auto;"></textarea>
+                            class="flex-1 min-w-0 bg-transparent border-none outline-none py-2.5 px-3 sm:px-4 resize-none max-h-36 text-slate-800 placeholder-slate-400 text-base custom-scrollbar" style="height: auto;"></textarea>
                         <button type="button" id="send-btn" aria-label="ส่งข้อความ"
-                            class="mb-0.5 p-3 bg-blue-600 text-white rounded-full hover:bg-blue-700 active:scale-90 transition-all shadow-sm shrink-0">
+                            class="mb-0.5 p-3 bg-blue-600 text-white rounded-full hover:bg-blue-700 active:scale-95 transition-all shadow-md shadow-blue-500/20 shrink-0">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
                                 <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
                             </svg>
@@ -633,6 +661,21 @@ LIMIT 20");
 
         <script>
             const userPic = <?= json_encode($user_picture, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
+
+            // ฟังก์ชันควบคุม Logout Confirmation Modal
+            const logoutModal = document.getElementById('logout-confirm-modal');
+            
+            function openLogoutModal() {
+                if (logoutModal) logoutModal.classList.add('active');
+            }
+
+            function closeLogoutModal() {
+                if (logoutModal) logoutModal.classList.remove('active');
+            }
+
+            logoutModal?.addEventListener('click', (e) => {
+                if (e.target === logoutModal) closeLogoutModal();
+            });
         </script>
         <script src="app.js?v=<?= time() ?>"></script>
     <?php endif; ?>
