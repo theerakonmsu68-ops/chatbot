@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let match;
         const videoIds = new Set();
 
-        // สะสมคลิป YouTube (ปรับสไตล์การ์ดขยายกว้างบาลานซ์สไตล์ Gemini)
+        // แสดงผลคลิปวิดีโอ YouTube เพียง 1 คลิปแรกสุด และปรับขนาดให้เต็มสัดส่วน max-w-[480px]
         while ((match = youtubeRegex.exec(text)) !== null) {
             if (match[1] && !videoIds.has(match[1])) {
                 videoIds.add(match[1]);
@@ -94,10 +94,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                     </div>
                 `;
+                break; // หยุดวนลูปหลังเจอคลิปแรก เพื่อไม่ให้ทำการ์ดวิดีโอซ้อนหลายอัน
             }
         }
 
-        // ลบลิงก์ YouTube ออกจากตัวข้อความ เพื่อไม่ให้ซ้ำซ้อน
+        // ลบลิงก์ YouTube ออกจากข้อความเพื่อป้องกันลิงก์ยาวเกินไป
         const cleanText = text.replace(youtubeRegex, '').trim();
 
         // Escape HTML สำหรับข้อความปกติ
@@ -398,7 +399,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // =====================================================
-    // Update Sidebar Realtime
+    // Update Sidebar Realtime (แสดงไอคอนถังขยะลบตลอดเวลา)
     // =====================================================
     function updateSidebarRealtime(chatId, message) {
         const historyList = document.getElementById('history-list');
