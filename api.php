@@ -11,100 +11,99 @@ header('Content-Type: application/json; charset=utf-8');
 
 function searchYoutube($keyword)
 {
-
     $api_key = getenv("YOUTUBE_API_KEY");
 
-
     if (empty($api_key)) {
-
         return null;
     }
-
-
 
     $url =
         "https://www.googleapis.com/youtube/v3/search?"
         . http_build_query([
-
-
             "key" => $api_key,
-
-
             "part" => "snippet",
-
-
             "q" => $keyword,
-
-
             "type" => "video",
-
-
             "maxResults" => 1,
-
-
             "regionCode" => "TH",
-
-
             "relevanceLanguage" => "th"
-
-
         ]);
-
-
 
     $ch = curl_init($url);
 
-
-
     curl_setopt_array($ch, [
-
-
         CURLOPT_RETURNTRANSFER => true,
-
-
-        CURLOPT_TIMEOUT => 10
-
-
+        CURLOPT_TIMEOUT => 10,
+        CURLOPT_SSL_VERIFYPEER => true,
+        CURLOPT_SSL_VERIFYHOST => 2
     ]);
-
-
 
     $response = curl_exec($ch);
 
+    if (curl_errno($ch)) {
 
+        error_log(
+            "YouTube CURL Error: " . curl_error($ch)
+        );
+
+        curl_close($ch);
+
+        return null;
+    }
+
+    $http_code = curl_getinfo(
+        $ch,
+        CURLINFO_HTTP_CODE
+    );
 
     curl_close($ch);
 
+    if ($http_code !== 200) {
 
-
-    $data =
-        json_decode(
-            $response,
-            true
+        error_log(
+            "YouTube API HTTP Error: " . $http_code
         );
 
-
-
-    if (
-        isset(
-            $data['items'][0]['id']['videoId']
-        )
-    ) {
-
-
-        return
-
-            "https://www.youtube.com/watch?v="
-
-            . $data['items'][0]['id']['videoId'];
+        return null;
     }
 
+    $data = json_decode(
+        $response,
+        true
+    );
 
+    if (
+        !isset($data['items'][0]['id']['videoId']) ||
+        !isset($data['items'][0]['snippet'])
+    ) {
+        return null;
+    }
 
-    return null;
+    $item = $data['items'][0];
+
+    $title = html_entity_decode(
+        $item['snippet']['title'] ?? '',
+        ENT_QUOTES | ENT_HTML5,
+        'UTF-8'
+    );
+
+    $channel = html_entity_decode(
+        $item['snippet']['channelTitle'] ?? '',
+        ENT_QUOTES | ENT_HTML5,
+        'UTF-8'
+    );
+
+    $videoId = $item['id']['videoId'];
+
+    return [
+        "videoId" => $videoId,
+        "title" => $title,
+        "artist" => $channel,
+        "url" =>
+            "https://www.youtube.com/watch?v="
+            . $videoId
+    ];
 }
-
-
 
 
 // =====================================================
@@ -114,48 +113,37 @@ function searchYoutube($keyword)
 require_once 'db_config.php';
 
 
-
 // =====================================================
-// เธฃเธฑเธ JSON
+// รับ JSON
 // =====================================================
-
 
 $data = json_decode(
-
     file_get_contents('php://input'),
-
     true
-
 );
 
-
+if (!is_array($data)) {
+    $data = [];
+}
 
 $user_id = $_SESSION['user_id'] ?? null;
-
 
 $action = $data['action'] ?? 'chat';
 
 
-
 // =====================================================
-// เธ•เธฃเธงเธ Login
+// ตรวจ Login
 // =====================================================
-
 
 if (!$user_id) {
 
-
     echo json_encode([
-
-
         "error" => "Unauthorized. Please login again."
-
-
     ], JSON_UNESCAPED_UNICODE);
-
 
     exit;
 }
+
 
 // =====================================================
 // FETCH CHAT HISTORY
@@ -163,485 +151,440 @@ if (!$user_id) {
 
 if ($action === 'fetch') {
 
-
     $chat_id = $data['chat_id'] ?? '';
-
-
 
     if (empty($chat_id)) {
 
-
         echo json_encode([
-
             "history" => []
-
         ], JSON_UNESCAPED_UNICODE);
-
 
         exit;
     }
 
-
-
     $stmt = $conn->prepare("
-
-        SELECT message, reply
-
+        SELECT
+            message,
+            reply
         FROM chat_history
-
         WHERE chat_id = ?
-
         AND user_id = ?
-
         ORDER BY id ASC
-
     ");
-
-
 
     if (!$stmt) {
 
-
         echo json_encode([
-
             "error" => "Database prepare error"
-
         ], JSON_UNESCAPED_UNICODE);
-
 
         exit;
     }
 
-
-
-
     $stmt->bind_param(
-
         "ss",
-
         $chat_id,
-
         $user_id
-
     );
-
-
 
     $stmt->execute();
 
-
-
     $result = $stmt->get_result();
-
-
 
     $history = [];
 
-
-
     while ($row = $result->fetch_assoc()) {
 
-
         $history[] = [
-
-
             "message" => $row['message'],
-
-
             "reply" => $row['reply']
-
-
         ];
     }
 
-
-
     $stmt->close();
 
-
-
     echo json_encode([
-
-
         "history" => $history
-
-
     ], JSON_UNESCAPED_UNICODE);
-
-
 
     exit;
 }
-
-
-
 
 
 // =====================================================
 // CHAT SYSTEM
 // =====================================================
 
-
 $message = trim(
-
     $data['message'] ?? ''
-
 );
-
-
 
 $chat_id = $data['chat_id'] ?? null;
 
 
-
-// เธชเธฃเนเธฒเธ Chat ID เนเธซเธกเน
+// =====================================================
+// สร้าง Chat ID ใหม่
+// =====================================================
 
 if (empty($chat_id)) {
 
-
     $chat_id = bin2hex(
-
         random_bytes(8)
-
     );
 }
 
 
-
+// =====================================================
+// ตรวจข้อความ
+// =====================================================
 
 if (empty($message)) {
 
-
     echo json_encode([
-
-
-        "reply" => "เธเธตเนเธชเธฒเธฃเธเธฒเธกเนเธกเนเนเธ”เนเธฃเธฑเธเธเนเธญเธเธงเธฒเธกเธเธฃเธฑเธ"
-
-
+        "reply" =>
+            "พี่สารคามไม่ได้รับข้อความครับ",
+        "chat_id" => $chat_id
     ], JSON_UNESCAPED_UNICODE);
-
-
 
     exit;
 }
 
 
+// =====================================================
+// ตรวจว่าเป็นคำขอเพลงหรือไม่
+// =====================================================
 
+$is_music_request = preg_match(
+    '/เพลง|ฟัง|เปิดเพลง|music|song|youtube/i',
+    $message
+);
+
+
+// =====================================================
+// MUSIC SEARCH
+// ถ้าเป็นคำขอเพลง จะไม่เรียก Groq
+// =====================================================
+
+if ($is_music_request) {
+
+    $keyword = preg_replace(
+        '/ขอ|หา|ช่วย|เพลง|ฟัง|เปิด|เปิดเพลง|ให้หน่อย|หน่อย|youtube|music|song/iu',
+        ' ',
+        $message
+    );
+
+    $keyword = trim(
+        preg_replace(
+            '/\s+/u',
+            ' ',
+            $keyword
+        )
+    );
+
+
+    // ถ้าตัดคำแล้ว keyword หาย
+    // ให้ใช้ข้อความเดิมค้นหา
+    if (empty($keyword)) {
+        $keyword = $message;
+    }
+
+
+    $youtube = searchYoutube(
+        $keyword
+    );
+
+
+    if ($youtube) {
+
+        $ai_reply =
+            "🎵 เพลง: "
+            . $youtube['title']
+            . "\n"
+            . "🎤 ศิลปิน/ช่อง: "
+            . $youtube['artist']
+            . "\n\n"
+            . "▶️ YouTube:\n"
+            . $youtube['url'];
+
+    } else {
+
+        $ai_reply =
+            "ขออภัยครับ ไม่พบเพลงที่ตรงกับคำค้นหา";
+    }
+
+
+    // =====================================================
+    // SAVE MUSIC CHAT HISTORY
+    // =====================================================
+
+    $stmt = $conn->prepare("
+        INSERT INTO chat_history
+        (
+            chat_id,
+            user_id,
+            message,
+            reply
+        )
+        VALUES (?,?,?,?)
+    ");
+
+    if ($stmt) {
+
+        $stmt->bind_param(
+            "ssss",
+            $chat_id,
+            $user_id,
+            $message,
+            $ai_reply
+        );
+
+        $stmt->execute();
+
+        $stmt->close();
+    }
+
+
+    // =====================================================
+    // CLOSE DATABASE
+    // =====================================================
+
+    $conn->close();
+
+
+    // =====================================================
+    // RESPONSE
+    // =====================================================
+
+    echo json_encode([
+        "reply" => $ai_reply,
+        "chat_id" => $chat_id
+    ], JSON_UNESCAPED_UNICODE);
+
+    exit;
+}
 
 
 // =====================================================
 // SYSTEM PROMPT
 // =====================================================
 
-
 $messages = [
 
     [
-
         "role" => "system",
 
         "content" => "
 
-เธเธธเธ“เธเธทเธญ เธเธตเนเธชเธฒเธฃเธเธฒเธก AI เธเธนเนเธเนเธงเธขเธญเธฑเธเธเธฃเธดเธขเธฐ
+คุณคือ พี่สารคาม AI ผู้ช่วยอัจฉริยะ
 
-เธซเธเนเธฒเธ—เธตเน:
-- เธ•เธญเธเธเธณเธ–เธฒเธกเนเธซเนเธ–เธนเธเธ•เนเธญเธเนเธฅเธฐเน€เธเนเธฒเนเธเธเนเธฒเธข
-- เธงเธดเน€เธเธฃเธฒเธฐเธซเนเธเธณเธ–เธฒเธกเธเนเธญเธเธ•เธญเธ
-- เนเธซเนเธเธณเธ•เธญเธเน€เธซเธกเธทเธญเธเธเธนเนเธเนเธงเธขเธกเธทเธญเธญเธฒเธเธตเธ
-- เนเธเนเธ เธฒเธฉเธฒเนเธ—เธขเน€เธเนเธเธซเธฅเธฑเธ
+หน้าที่:
+- ตอบคำถามให้ถูกต้องและเข้าใจง่าย
+- วิเคราะห์คำถามก่อนตอบ
+- ให้คำตอบเหมือนผู้ช่วยมืออาชีพ
+- ใช้ภาษาไทยเป็นหลัก
 
-เธฃเธนเธเนเธเธเธเธฒเธฃเธ•เธญเธ:
-- เน€เธฃเธตเธขเธเน€เธฃเธตเธขเธเน€เธเนเธเธเธฃเธฐเนเธขเธเธ—เธตเนเธญเนเธฒเธเธเนเธฒเธข
-- เนเธเนเธขเนเธญเธซเธเนเธฒเนเธซเนเน€เธซเธกเธฒเธฐเธชเธก
-- เธ–เนเธฒเธกเธตเธซเธฅเธฒเธขเธเนเธญ เนเธซเนเนเธเนเธฃเธฒเธขเธเธฒเธฃเธ•เธฑเธงเน€เธฅเธเธซเธฃเธทเธญเธซเธฑเธงเธเนเธญ
-- เนเธกเนเนเธเน Markdown เธ—เธตเนเธเธฑเธเธเนเธญเธ
-- เนเธกเนเนเธเนเน€เธเธฃเธทเนเธญเธเธซเธกเธฒเธขเธเธดเน€เธจเธฉ เน€เธเนเธ ###, **, ``` 
-- เนเธกเนเนเธชเนเนเธเนเธ”เธซเธฃเธทเธญเธฃเธนเธเนเธเธเนเธเธฅเธ เน เธซเธฒเธเธเธนเนเนเธเนเนเธกเนเนเธ”เนเธฃเนเธญเธเธเธญ
+รูปแบบการตอบ:
+- เรียบเรียงเป็นประโยคที่อ่านง่าย
+- ใช้ย่อหน้าให้เหมาะสม
+- ถ้ามีหลายข้อ ให้ใช้รายการตัวเลขหรือหัวข้อ
+- ไม่ใช้ Markdown ที่ซับซ้อน
+- ไม่ใช้เครื่องหมายพิเศษ เช่น ###, **, ```
+- ไม่ใส่โค้ดหรือรูปแบบแปลก ๆ หากผู้ใช้ไม่ได้ร้องขอ
 
-เธชเนเธ•เธฅเน:
-- เธชเธธเธ เธฒเธ
-- เน€เธเนเธเธเธฑเธเน€เธญเธ
-- เธเธฃเธฐเธเธฑเธ เนเธ•เนเนเธซเนเธเนเธญเธกเธนเธฅเธเธฃเธ
-- เธญเธเธดเธเธฒเธขเน€เธซเธกเธทเธญเธเธเธนเนเน€เธเธตเนเธขเธงเธเธฒเธเธเธณเธฅเธฑเธเนเธซเนเธเธณเนเธเธฐเธเธณ
+สไตล์:
+- สุภาพ
+- เป็นกันเอง
+- กระชับ แต่ให้ข้อมูลครบ
+- อธิบายเหมือนผู้เชี่ยวชาญกำลังให้คำแนะนำ
 
-เธซเธฒเธเนเธกเนเนเธเนเนเธ:
-- เนเธเนเธเธญเธขเนเธฒเธเธ•เธฃเธเนเธเธ•เธฃเธเธกเธฒ
-- เนเธกเนเนเธ•เนเธเธเนเธญเธกเธนเธฅเธเธถเนเธเน€เธญเธ
+หากไม่แน่ใจ:
+- แจ้งอย่างตรงไปตรงมา
+- ไม่แต่งข้อมูลขึ้นเอง
 
-เธซเธฒเธเธเธนเนเนเธเนเธเธญเน€เธเธฅเธ:
-- เธเธญเธเธเธทเนเธญเน€เธเธฅเธเนเธฅเธฐเธจเธดเธฅเธเธดเธ
-- เธฃเธฐเธเธเธเธฐเน€เธเธดเนเธกเธฅเธดเธเธเน YouTube เนเธซเนเธญเธฑเธ•เนเธเธกเธฑเธ•เธด
-- เนเธกเนเธชเธฃเนเธฒเธเธฅเธดเธเธเนเธเธฅเธญเธก
+หากผู้ใช้ขอเพลง:
+- ระบบจะจัดการค้นหาเพลงจาก YouTube เอง
+- ไม่สร้างลิงก์ YouTube ปลอม
 
-เธเนเธญเธเธ•เธญเธเนเธซเนเธงเธดเน€เธเธฃเธฒเธฐเธซเนเธเธงเธฒเธกเธ•เนเธญเธเธเธฒเธฃเธเธญเธเธเธนเนเนเธเนเธเนเธญเธ
+ก่อนตอบให้วิเคราะห์ความต้องการของผู้ใช้ก่อน
 
-เธ•เธญเธเน€เธเธเธฒเธฐเธเนเธญเธกเธนเธฅเธ—เธตเนเธเธณเน€เธเนเธ
-เนเธกเนเธญเธเธดเธเธฒเธขเธเธฃเธฐเธเธงเธเธเธฒเธฃเธเธดเธ”เธ เธฒเธขเนเธ
-เนเธกเนเนเธชเธ”เธเน€เธซเธ•เธธเธเธฅเธเธฒเธฃเธเธดเธ”เธ—เธตเธฅเธฐเธเธฑเนเธ
+ตอบเฉพาะข้อมูลที่จำเป็น
 
-เธ•เธญเธเน€เธซเธกเธทเธญเธเธเธนเนเธเนเธงเธขเธชเนเธงเธเธ•เธฑเธงเธ—เธตเนเธกเธตเธเธงเธฒเธกเธฃเธนเน
+ไม่อธิบายกระบวนการคิดภายใน
+
+ไม่แสดงเหตุผลการคิดทีละขั้น
+
+ตอบเหมือนผู้ช่วยส่วนตัวที่มีความรู้
 
 "
-
     ]
-
 ];
-
-
-
-
 
 
 // =====================================================
 // LOAD HISTORY 10 RECORD
 // =====================================================
 
-
 $stmt_history = $conn->prepare("
-
-
-SELECT message, reply
-
-FROM chat_history
-
-WHERE chat_id = ?
-
-AND user_id = ?
-
-ORDER BY id DESC
-
-LIMIT 10
-
-
+    SELECT
+        message,
+        reply
+    FROM
+    (
+        SELECT
+            id,
+            message,
+            reply
+        FROM chat_history
+        WHERE chat_id = ?
+        AND user_id = ?
+        ORDER BY id DESC
+        LIMIT 10
+    ) AS recent_history
+    ORDER BY id ASC
 ");
-
-
 
 if ($stmt_history) {
 
-
     $stmt_history->bind_param(
-
-
         "ss",
-
-
         $chat_id,
-
-
         $user_id
-
-
     );
-
-
 
     $stmt_history->execute();
 
-
-
     $result_history =
-
         $stmt_history->get_result();
 
-
-
-
-    while ($row = $result_history->fetch_assoc()) {
-
+    while (
+        $row =
+        $result_history->fetch_assoc()
+    ) {
 
         $messages[] = [
-
-
             "role" => "user",
-
-
             "content" => $row['message']
-
-
         ];
 
-
-
         $messages[] = [
-
-
             "role" => "assistant",
-
-
             "content" => $row['reply']
-
-
         ];
     }
-
-
 
     $stmt_history->close();
 }
 
 
-
-
-
-// เน€เธเธดเนเธกเธเนเธญเธเธงเธฒเธกเธเธฑเธเธเธธเธเธฑเธ
+// =====================================================
+// เพิ่มข้อความปัจจุบัน
+// =====================================================
 
 $messages[] = [
-
-
     "role" => "user",
-
-
     "content" => $message
-
-
 ];
-
-
-
 
 
 // =====================================================
 // GROQ CONFIG
 // =====================================================
 
+$api_key = getenv(
+    "GROQ_API_KEY"
+);
 
-$api_key = getenv("GROQ_API_KEY");
-
-
-
-$model = getenv("GROQ_MODEL")
-
+$model =
+    getenv("GROQ_MODEL")
     ?: "openai/gpt-oss-120b";
-
-
 
 
 if (empty($api_key)) {
 
-
     echo json_encode([
-
-
-        "reply" => "เธเธญเธญเธ เธฑเธขเธเธฃเธฑเธ เธฃเธฐเธเธเธขเธฑเธเนเธกเนเนเธ”เนเธ•เธฑเนเธเธเนเธฒ Groq API Key"
-
-
+        "reply" =>
+            "ขออภัยครับ ระบบยังไม่ได้ตั้งค่า Groq API Key",
+        "chat_id" => $chat_id
     ], JSON_UNESCAPED_UNICODE);
-
-
 
     $conn->close();
 
-
     exit;
 }
+
 
 // =====================================================
 // CALL GROQ API
 // =====================================================
 
-
 $api_url =
     "https://api.groq.com/openai/v1/chat/completions";
 
 
-
-$ch = curl_init($api_url);
-
+$ch = curl_init(
+    $api_url
+);
 
 
 curl_setopt_array($ch, [
 
-
     CURLOPT_HTTPHEADER => [
 
-
-        "Authorization: Bearer " . $api_key,
-
+        "Authorization: Bearer "
+        . $api_key,
 
         "Content-Type: application/json"
-
-
     ],
-
-
 
     CURLOPT_POST => true,
 
+    CURLOPT_POSTFIELDS =>
+        json_encode([
 
+            "model" => $model,
 
-    CURLOPT_POSTFIELDS => json_encode([
+            "messages" => $messages,
 
+            "temperature" => 0.4,
 
-        "model" => $model,
+            "top_p" => 0.9
 
-
-        "messages" => $messages,
-
-        "temperature" => 0.4,
-
-        "top_p" => 0.9
-
-
-
-    ], JSON_UNESCAPED_UNICODE),
-
-
+        ], JSON_UNESCAPED_UNICODE),
 
     CURLOPT_RETURNTRANSFER => true,
 
-
-
     CURLOPT_TIMEOUT => 60,
-
-
 
     CURLOPT_SSL_VERIFYPEER => true,
 
-
     CURLOPT_SSL_VERIFYHOST => 2
-
-
-
 ]);
 
 
-
-
-$response = curl_exec($ch);
-
-
-
+$response =
+    curl_exec($ch);
 
 
 // =====================================================
 // CHECK CURL ERROR
 // =====================================================
 
-
 if (curl_errno($ch)) {
 
-
-
-    $error = curl_error($ch);
-
-
+    $error =
+        curl_error($ch);
 
     curl_close($ch);
 
-
-
     error_log(
-        "Groq CURL Error : " . $error
+        "Groq CURL Error : "
+        . $error
     );
 
-
-
     $ai_reply =
-        "เธเธญเธญเธ เธฑเธขเธเธฃเธฑเธ เธเธตเนเธชเธฒเธฃเธเธฒเธกเนเธกเนเธชเธฒเธกเธฒเธฃเธ–เน€เธเธทเนเธญเธกเธ•เนเธญเธฃเธฐเธเธ AI เนเธ”เน";
+        "ขออภัยครับ พี่สารคามไม่สามารถเชื่อมต่อระบบ AI ได้";
+
 } else {
-
-
 
     $http_code =
         curl_getinfo(
@@ -649,10 +592,7 @@ if (curl_errno($ch)) {
             CURLINFO_HTTP_CODE
         );
 
-
-
     curl_close($ch);
-
 
 
     $json =
@@ -662,19 +602,16 @@ if (curl_errno($ch)) {
         );
 
 
-
-
     if (
         isset(
             $json['choices'][0]['message']['content']
         )
     ) {
 
-
-
         $ai_reply =
-
             $json['choices'][0]['message']['content'];
+
+
         // =====================================================
         // Clean AI Response
         // =====================================================
@@ -687,183 +624,89 @@ if (curl_errno($ch)) {
 
 
         $ai_reply = str_replace(
-            ['**', '```'],
+            [
+                '**',
+                '```'
+            ],
             '',
             $ai_reply
         );
 
 
-        $ai_reply = trim($ai_reply);
+        $ai_reply =
+            trim($ai_reply);
+
     } else {
 
-
-
         $api_error =
-
             $json['error']['message']
-
             ?? "Unknown Groq Error";
 
 
-
         error_log(
-
             "Groq API Error HTTP "
-
-                . $http_code
-
-                . " : "
-
-                . $api_error
-
+            . $http_code
+            . " : "
+            . $api_error
         );
 
 
-
         $ai_reply =
-
-            "เธเธญเธญเธ เธฑเธขเธเธฃเธฑเธ เธเธตเนเธชเธฒเธฃเธเธฒเธกเนเธกเนเธชเธฒเธกเธฒเธฃเธ–เธเธฃเธฐเธกเธงเธฅเธเธฅเนเธ”เน";
+            "ขออภัยครับ พี่สารคามไม่สามารถประมวลผลได้";
     }
 }
-
-
-
-
-
-
-// =====================================================
-// MUSIC SEARCH
-// =====================================================
-
-
-if (
-    preg_match(
-        '/เน€เธเธฅเธ|เธเธฑเธ|music|song|youtube/i',
-        $message
-    )
-) {
-
-
-   $keyword = preg_replace(
-    '/เธเธญ|เน€เธเธฅเธ|เธเธฑเธ|เน€เธเธดเธ”|youtube/i',
-    '',
-    $message
-);
-
-
-$youtube = searchYoutube(
-    trim($keyword)
-);
-
-
-
-    if ($youtube) {
-
-
-
-        $ai_reply .=
-
-
-            "\n\n๐ง เน€เธเธดเธ”เธเธฑเธเน€เธเธฅเธ:\n"
-
-            . $youtube;
-    }
-}
-
-
-
-
 
 
 // =====================================================
 // SAVE CHAT HISTORY
 // =====================================================
 
-
 $stmt = $conn->prepare("
-
-
-INSERT INTO chat_history
-
-(
-    chat_id,
-    user_id,
-    message,
-    reply
-)
-
-VALUES (?,?,?,?)
-
-
+    INSERT INTO chat_history
+    (
+        chat_id,
+        user_id,
+        message,
+        reply
+    )
+    VALUES (?,?,?,?)
 ");
-
-
 
 
 if ($stmt) {
 
-
-
     $stmt->bind_param(
-
-
         "ssss",
-
-
         $chat_id,
-
-
         $user_id,
-
-
         $message,
-
-
         $ai_reply
-
-
-
     );
-
 
 
     $stmt->execute();
 
-
-
     $stmt->close();
 }
-
-
-
-
 
 
 // =====================================================
 // CLOSE DATABASE
 // =====================================================
 
-
 $conn->close();
-
-
-
-
 
 
 // =====================================================
 // RESPONSE
 // =====================================================
 
-
 echo json_encode([
 
+    "reply" =>
+        $ai_reply,
 
-    "reply" => $ai_reply,
-
-
-    "chat_id" => $chat_id
-
-
+    "chat_id" =>
+        $chat_id
 
 ], JSON_UNESCAPED_UNICODE);
