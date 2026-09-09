@@ -1,12 +1,12 @@
 /**
- * พี่สารคาม AI - Render Production Edition
+ * เธเธตเนเธชเธฒเธฃเธเธฒเธก AI - Render Production Edition
  * Secure Frontend Version
  */
 
 document.addEventListener('DOMContentLoaded', () => {
 
     // =====================================================
-    // SVG Icons Reference (ใช้ SVG Vector แทน Emoji ทั้งหมด)
+    // SVG Icons Reference (เนเธเน SVG Vector เนเธ—เธ Emoji เธ—เธฑเนเธเธซเธกเธ”)
     // =====================================================
     const ICONS = {
         delete: `<svg class="w-4 h-4 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>`,
@@ -68,14 +68,14 @@ document.addEventListener('DOMContentLoaded', () => {
     function linkify(text) {
         if (!text) return "";
 
-        // Regular Expression สำหรับดึง ID ของ YouTube
+        // Regular Expression เธชเธณเธซเธฃเธฑเธเธ”เธถเธ ID เธเธญเธ YouTube
         const youtubeRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|v\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})(?:[^\s]*)/g;
         
         let videoCards = '';
         let match;
         const videoIds = new Set();
 
-        // แสดงผลคลิปวิดีโอ YouTube เพียง 1 คลิปแรกสุด และปรับขนาดให้เต็มสัดส่วน max-w-[480px]
+        // เธชเธฐเธชเธกเธเธฅเธดเธ YouTube (เธเธฃเธฑเธเธชเนเธ•เธฅเนเธเธฒเธฃเนเธ”เธเธขเธฒเธขเธเธงเนเธฒเธเธเธฒเธฅเธฒเธเธเนเธชเนเธ•เธฅเน Gemini)
         while ((match = youtubeRegex.exec(text)) !== null) {
             if (match[1] && !videoIds.has(match[1])) {
                 videoIds.add(match[1]);
@@ -94,17 +94,16 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                     </div>
                 `;
-                break; // หยุดวนลูปหลังเจอคลิปแรก เพื่อไม่ให้ทำการ์ดวิดีโอซ้อนหลายอัน
             }
         }
 
-        // ลบลิงก์ YouTube ออกจากข้อความเพื่อป้องกันลิงก์ยาวเกินไป
+        // เธฅเธเธฅเธดเธเธเน YouTube เธญเธญเธเธเธฒเธเธ•เธฑเธงเธเนเธญเธเธงเธฒเธก เน€เธเธทเนเธญเนเธกเนเนเธซเนเธเนเธณเธเนเธญเธ
         const cleanText = text.replace(youtubeRegex, '').trim();
 
-        // Escape HTML สำหรับข้อความปกติ
+        // Escape HTML เธชเธณเธซเธฃเธฑเธเธเนเธญเธเธงเธฒเธกเธเธเธ•เธด
         let htmlContent = escapeHTML(cleanText);
 
-        // แปลง URL ทั่วไปเป็น Hyperlink
+        // เนเธเธฅเธ URL เธ—เธฑเนเธงเนเธเน€เธเนเธ Hyperlink
         const urlRegex = /(https?:\/\/[^\s]+)/g;
         htmlContent = htmlContent
             .replace(urlRegex, '<a href="$1" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 underline font-medium break-all">$1</a>')
@@ -188,7 +187,7 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error("Load History Error:", error);
             if (msgContainer) {
                 msgContainer.innerHTML = `
-                    <p class="text-center text-red-400 py-10 text-sm">ไม่สามารถโหลดประวัติการสนทนาได้</p>
+                    <p class="text-center text-red-400 py-10 text-sm">เนเธกเนเธชเธฒเธกเธฒเธฃเธ–เนเธซเธฅเธ”เธเธฃเธฐเธงเธฑเธ•เธดเธเธฒเธฃเธชเธเธ—เธเธฒเนเธ”เน</p>
                 `;
             }
         }
@@ -262,11 +261,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     }, 2500);
                 }
             } else {
-                alert('ไม่สามารถลบข้อมูลห้องสนทนาได้');
+                alert('เนเธกเนเธชเธฒเธกเธฒเธฃเธ–เธฅเธเธเนเธญเธกเธนเธฅเธซเนเธญเธเธชเธเธ—เธเธฒเนเธ”เน');
             }
         } catch (error) {
             console.error("Delete Error:", error);
-            alert('ไม่สามารถเชื่อมต่อ Server ได้');
+            alert('เนเธกเนเธชเธฒเธกเธฒเธฃเธ–เน€เธเธทเนเธญเธกเธ•เนเธญ Server เนเธ”เน');
         }
     });
 
@@ -388,7 +387,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (aiBubble) {
                 const area = aiBubble.querySelector('.content-area');
                 if (area) {
-                    area.innerHTML = `<span class="text-red-500">ขออภัยครับ ระบบเชื่อมต่อไม่ได้</span>`;
+                    area.innerHTML = `<span class="text-red-500">เธเธญเธญเธ เธฑเธขเธเธฃเธฑเธ เธฃเธฐเธเธเน€เธเธทเนเธญเธกเธ•เนเธญเนเธกเนเนเธ”เน</span>`;
                 }
             }
         } finally {
@@ -399,7 +398,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // =====================================================
-    // Update Sidebar Realtime (แสดงไอคอนถังขยะลบตลอดเวลา)
+    // Update Sidebar Realtime
     // =====================================================
     function updateSidebarRealtime(chatId, message) {
         const historyList = document.getElementById('history-list');
